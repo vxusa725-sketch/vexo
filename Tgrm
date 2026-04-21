@@ -1,0 +1,37 @@
+TOKEN = "8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwX0DPs"
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    # تأكد أن هذه النصوص هي نفسها التي سيقرأها البوت بالأسفل
+    btn1 = types.KeyboardButton("📸 استخراج ثغرة السلفي (Selfie)")
+    btn2 = types.KeyboardButton("🔐 سحب قاعدة بيانات انستا (Login)")
+    markup.add(btn1, btn2)
+
+    welcome_text = (
+        "⚠️ **UNAUTHORIZED ACCESS DETECTED** ⚠️\n"
+        "--------------------------------------\n"
+        "Welcome back, **Master VEXO**.. 👑\n\n"
+        "الأنظمة مشفرة وجاهزة لتنفيذ أوامرك."
+    )
+    bot.reply_to(message, welcome_text, reply_markup=markup, parse_mode="Markdown")
+
+@bot.message_handler(func=lambda message: True)
+def handle_hacking(message):
+    # التحقق من الضغط على زر السلفي
+    if "استخراج ثغرة السلفي" in message.text:
+        msg = bot.send_message(message.chat.id, "☣️ **INITIALIZING EXPLOIT...**")
+        time.sleep(1)
+        bot.edit_message_text("🔓 Bypassing Web-Firewall... [100%]", message.chat.id, msg.message_id)
+        bot.send_message(message.chat.id, "تفضل يا **Master VEXO**.. الرابط جاهز:\nhttps://vxusa725-sketch.github.io/vexo/inndex.html")
+
+    # التحقق من الضغط على زر الانستا
+    elif "سحب قاعدة بيانات انستا" in message.text:
+        msg = bot.send_message(message.chat.id, "🔍 **SCANNING TARGETS...**")
+        time.sleep(1)
+        bot.edit_message_text("✅ SQL Database Cracked!", message.chat.id, msg.message_id)
+        bot.send_message(message.chat.id, "الهدف في المصيدة يا **Master VEXO**.. 👑\nhttps://is.gd/aEgs7m")
+
+print("البوت شغال الآن.. أرسل /start")
+bot.infinity_polling()
