@@ -1,118 +1,220 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HyperOS Elite Test</title>
+    <title>HyperOS Kernel-Level Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --hyper-ease: cubic-bezier(0.3, 0, 0, 1); /* محاكاة دقيقة لمحرك شاومي */
-            --bg-url: url('https://w0.peakpx.com/wallpaper/705/185/HD-wallpaper-hyper-os-xiaomi.jpg');
+            --ios-curve: cubic-bezier(0.4, 0, 0.2, 1);
+            --hyper-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --system-bg: #000;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%; overflow: hidden;
-            background: var(--bg-url) center/cover no-repeat;
-            font-family: sans-serif;
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica;
         }
 
-        /* الطبقة الضبابية الخلفية */
-        #blur-layer {
-            position: fixed; inset: 0; 
-            backdrop-filter: blur(0px);
-            transition: backdrop-filter 0.5s var(--hyper-ease);
-            z-index: 5; pointer-events: none;
+        /* حاوية الهاتف (Physical Device Simulation) */
+        .phone-frame {
+            width: 360px;
+            height: 740px;
+            background: url('https://images.unsplash.com/photo-1617957718614-8c23f060c2d0?q=80&w=1000') center/cover;
+            border: 8px solid #333;
+            border-radius: 45px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
         }
 
-        .container {
-            position: relative; height: 100%; z-index: 10;
-            display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 50px;
+        /* شريط الحالة (Status Bar) */
+        .status-bar {
+            height: 40px;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            z-index: 100;
+            position: relative;
         }
 
-        .dock {
-            align-self: center; background: rgba(255,255,255,0.25);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 12px; border-radius: 28px; display: flex; gap: 15px;
-            border: 1px solid rgba(255,255,255,0.2);
+        /* شبكة التطبيقات (Springboard) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+            transition: transform 0.6s var(--ios-curve), filter 0.6s;
         }
 
-        .icon {
-            width: 55px; height: 55px; border-radius: 14px;
-            cursor: pointer; transition: transform 0.2s var(--hyper-ease);
-            display: flex; align-items: center; justify-content: center; font-size: 28px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        /* حركة الضغط (Feedback) */
-        .icon:active { transform: scale(0.85); }
+        .app-icon:active { transform: scale(0.85); }
 
-        /* نافذة التطبيق "السائلة" */
-        .app-view {
-            position: fixed; 
-            width: 100vw; height: 100vh;
-            top: 0; left: 0;
-            background: rgba(255,255,255,0.95);
-            transform: scale(0.9) translateY(100%);
-            opacity: 0; border-radius: 40px;
-            transition: transform 0.5s var(--hyper-ease), opacity 0.4s var(--hyper-ease);
-            z-index: 20; display: flex; align-items: center; justify-content: center;
+        .icon-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            margin-bottom: 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
         }
 
-        .app-view.open {
+        /* نافذة النظام (OS Window Management) */
+        .app-window {
+            position: absolute;
+            inset: 0;
+            background: #f4f4f4;
+            z-index: 200;
+            transform: scale(0) translateY(100%);
+            opacity: 0;
+            border-radius: 40px;
+            transition: all 0.5s var(--ios-curve);
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .app-window.active {
             transform: scale(1) translateY(0);
-            opacity: 1; border-radius: 0px;
+            opacity: 1;
+            border-radius: 0px;
+            pointer-events: auto;
         }
 
-        .app-content { text-align: center; }
-        .close-hint { color: #888; font-size: 14px; margin-top: 20px; }
+        /* محاكاة محتوى التطبيقات */
+        .app-header { height: 80px; padding: 40px 20px 10px; background: white; font-weight: bold; border-bottom: 1px solid #eee; }
+        .app-body { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        /* إيماءة الإغلاق (Home Indicator) */
+        .home-bar {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            z-index: 300;
+            cursor: pointer;
+        }
 
-        /* ألوان الأيقونات */
-        .c-1 { background: #3b82f6; } /* Camera */
-        .c-2 { background: #10b981; } /* Phone */
-        .c-3 { background: #6366f1; } /* Settings */
+        .app-window .home-bar { background: rgba(0,0,0,0.2); }
+
+        /* الأنظمة الوهمية (UI Mockups) */
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .skeleton { height: 15px; background: #eee; border-radius: 5px; margin-bottom: 8px; }
+
     </style>
 </head>
 <body>
 
-<div id="blur-layer"></div>
-
-<div class="container">
-    <div class="dock">
-        <div class="icon c-1" onclick="launch('الكاميرا')">📷</div>
-        <div class="icon c-2" onclick="launch('الهاتف')">📞</div>
-        <div class="icon c-3" onclick="launch('الإعدادات')">⚙️</div>
+<div class="phone-frame">
+    <div class="status-bar">
+        <span>12:00</span>
+        <div class="flex gap-2">
+            <span>📶</span><span>🔋</span>
+        </div>
     </div>
-</div>
 
-<div id="app" class="app-view" onclick="closeApp()">
-    <div class="app-content">
-        <h1 id="app-name">App</h1>
-        <p>اختبار سلاسة الاستجابة المتتالية</p>
-        <div class="close-hint">اضغط في أي مكان للإغلاق</div>
+    <div id="home-screen" class="grid-container">
+        </div>
+
+    <div id="app-window" class="app-window">
+        <div class="app-header" id="app-title">اسم التطبيق</div>
+        <div class="app-body" id="app-content">
+            </div>
+        <div class="home-bar" onclick="closeApp()"></div>
+    </div>
+
+    <div class="absolute bottom-6 left-0 right-0 px-4">
+        <div class="bg-white/30 backdrop-blur-xl p-3 rounded-[30px] flex justify-around border border-white/20">
+            <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-lg" onclick="openApp('الهاتف')">📞</div>
+            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg" onclick="openApp('الرسائل')">💬</div>
+            <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg" onclick="openApp('المتصفح')">🌐</div>
+        </div>
     </div>
 </div>
 
 <script>
-    const app = document.getElementById('app');
-    const blur = document.getElementById('blur-layer');
-    const nameTxt = document.getElementById('app-name');
+    const apps = [
+        { name: 'الإعدادات', icon: '⚙️', color: 'bg-gray-500', content: 'قائمة النظام، الحماية، البطارية...' },
+        { name: 'الصور', icon: '🖼️', color: 'bg-white', content: 'آخر الصور المتقطعة، المجلدات...' },
+        { name: 'الموسيقى', icon: '🎵', color: 'bg-red-500', content: 'الآن يعمل: Veki Veki Phonk Remix...' },
+        { name: 'المتجر', icon: '🛍️', color: 'bg-blue-400', content: 'تحديثات التطبيقات، الألعاب...' },
+        { name: 'الملفات', icon: '📂', color: 'bg-yellow-500', content: 'الذاكرة الداخلية: 128GB متوفرة...' },
+        { name: 'الحاسبة', icon: '➕', color: 'bg-orange-400', content: 'محاكي عمليات حسابية معقدة...' },
+    ];
 
-    function launch(name) {
-        // ميزة الـ Interrupt: إغلاق فوري للقديم وفتح الجديد
-        app.classList.remove('open');
+    const grid = document.getElementById('home-screen');
+    const win = document.getElementById('app-window');
+    const title = document.getElementById('app-title');
+    const content = document.getElementById('app-content');
+
+    // توليد الأيقونات برمجياً لضمان سلاسة الـ DOM
+    apps.forEach(app => {
+        const div = document.createElement('div');
+        div.className = 'app-icon';
+        div.onclick = () => openApp(app.name, app.content);
+        div.innerHTML = `
+            <div class="icon-img ${app.color}">${app.icon}</div>
+            <span class="text-white text-[10px] mt-1">${app.name}</span>
+        `;
+        grid.appendChild(div);
+    });
+
+    function openApp(name, mockData) {
+        // محاكاة تقنية Interruptible Animation
+        win.classList.remove('active');
         
         setTimeout(() => {
-            nameTxt.innerText = name;
-            app.classList.add('open');
-            blur.style.backdropFilter = "blur(15px)";
-        }, 10); // تأخير تقني 10ms فقط لضمان إعادة تشغيل الـ Animation
+            title.innerText = name;
+            content.innerHTML = `
+                <div class="card"><div class="skeleton w-3/4"></div><div class="skeleton w-1/2"></div></div>
+                <div class="card"><div class="skeleton w-full"></div><div class="skeleton w-2/3"></div></div>
+                <div class="p-4 text-sm text-gray-600">${mockData || 'جاري تحميل واجهة النظام...'}</div>
+            `;
+            win.classList.add('active');
+            grid.style.transform = 'scale(0.9)';
+            grid.style.filter = 'blur(10px)';
+        }, 50);
     }
 
     function closeApp() {
-        app.classList.remove('open');
-        blur.style.backdropFilter = "blur(0px)";
+        win.classList.remove('active');
+        grid.style.transform = 'scale(1)';
+        grid.style.filter = 'blur(0px)';
     }
-</script>
 
+    // دعم إيماءة السحب للأسفل للإغلاق (Gesture Simulation)
+    let startY = 0;
+    win.addEventListener('touchstart', e => startY = e.touches[0].clientY);
+    win.addEventListener('touchmove', e => {
+        let moveY = e.touches[0].clientY - startY;
+        if (moveY > 100) closeApp();
+    });
+
+</script>
 </body>
 </html>
