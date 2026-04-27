@@ -3,303 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HyperOS Kernel-Level Simulator</title>
+    <title>HyperOS Kernel v5.0 | Advanced Simulation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 1. Core System Configurations */
+        /* 1. نظام التعريفات الرسمية (System Design Tokens) */
         :root {
-            --hyper-bezier: cubic-bezier(0.3, 0.7, 0.1, 1);
-            --spring-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.2);
-            --icon-radius: 1.42rem;
-            --glass-blur: blur(35px) saturate(180%) brightness(1.1);
+            --mi-curve: cubic-bezier(0.32, 0.72, 0, 1); /* منحنى شاومي الرسمي للأنيميشن */
+            --icon-radius: 1.45rem;
+            --system-blur: blur(40px) saturate(180%) brightness(1.1);
+            --depth-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+
         body {
             background: #000;
             color: #fff;
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'MiSans', 'Inter', system-ui;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            touch-action: none;
+            touch-action: none; /* حظر أوامر المتصفح للسماح بالإيماءات */
         }
 
-        /* 2. Professional Phone Frame (Xiaomi 14 Pro Style) */
-        .device-chassis {
-            width: 385px;
-            height: 840px;
+        /* 2. حاوية الهاتف المحسنة (Device Chassis) */
+        .phone-body {
+            width: 395px;
+            height: 855px;
             background: #000;
-            border-radius: 64px;
-            border: 12px solid #1a1a1a;
+            border-radius: 65px;
+            border: 12px solid #1c1c1c;
             position: relative;
-            box-shadow: 0 0 0 4px #333, 0 50px 100px rgba(0,0,0,0.9);
+            box-shadow: 0 0 0 3px #333, 0 80px 160px rgba(0,0,0,0.9);
             overflow: hidden;
         }
 
-        .dynamic-notch {
+        .dynamic-island {
             position: absolute;
-            top: 15px; left: 50%;
-            transform: translateX(-50%);
-            width: 26px; height: 26px;
-            background: #000; border-radius: 50%; z-index: 1000;
+            top: 14px; left: 50%; transform: translateX(-50%);
+            width: 32px; height: 32px; background: #000; border-radius: 50%; z-index: 2000;
         }
 
-        /* 3. Wallpaper & Blur Engine */
-        #wallpaper-engine {
+        /* 3. محرك الرسوميات (Motion Engine) */
+        #wallpaper {
             position: absolute;
             inset: 0;
-            background: url('https://w0.peakpx.com/wallpaper/1018/143/HD-wallpaper-hyperos-xiaomi.jpg') center/cover;
+            background: url('https://w0.peakpx.com/wallpaper/705/185/HD-wallpaper-hyper-os-xiaomi.jpg') center/cover;
             z-index: 1;
-            transition: transform 1.2s var(--hyper-bezier), filter 1s var(--hyper-bezier);
             will-change: transform, filter;
+            transition: transform 1s var(--mi-curve), filter 1s var(--mi-curve);
         }
 
-        /* 4. HyperOS App Icons (SVG Replicas) */
-        .icon-grid {
+        /* 4. أيقونات HyperOS (رسم SVG برمجياً للدقة) */
+        .launcher-grid {
             position: relative;
             z-index: 10;
             padding: 30px;
-            padding-top: 70px;
+            padding-top: 80px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 22px;
-            transition: transform 0.8s var(--hyper-bezier), opacity 0.5s;
+            gap: 25px 20px;
+            transition: transform 0.8s var(--mi-curve), opacity 0.5s;
         }
 
-        .icon-unit {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: transform 0.2s;
+        .icon-container {
+            display: flex; flex-direction: column; align-items: center; gap: 7px;
         }
 
-        .icon-unit:active { transform: scale(0.8); }
-
-        .icon-svg {
-            width: 65px;
-            height: 65px;
+        .app-icon {
+            width: 65px; height: 65px;
             border-radius: var(--icon-radius);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: #fff;
+            transition: transform 0.2s var(--mi-curve);
         }
 
-        /* 5. Window Manager ( Kernal Level ) */
-        #os-window {
+        .app-icon:active { transform: scale(0.82); }
+
+        .label { font-size: 11px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+
+        /* 5. الـ Dock السفلي العائم */
+        .dock {
+            position: absolute;
+            bottom: 25px; left: 18px; right: 18px;
+            height: 94px;
+            background: rgba(255,255,255,0.22);
+            backdrop-filter: var(--system-blur);
+            -webkit-backdrop-filter: var(--system-blur);
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.15);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 0 15px; z-index: 100;
+        }
+
+        /* 6. محرك النوافذ (Window Manager Logic) */
+        #window-manager {
             position: absolute;
             inset: 0;
             z-index: 900;
-            background: #fdfdfd;
-            border-radius: 50px;
-            transform: translateY(100%) scale(0.9);
+            background: #f4f4f7;
+            border-radius: 55px;
+            transform: translateY(100%) scale(0.92);
             opacity: 0;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             will-change: transform, opacity, border-radius;
-            transition: transform 0.65s var(--hyper-bezier), opacity 0.35s, border-radius 0.65s var(--hyper-bezier);
+            transition: transform 0.6s var(--mi-curve), opacity 0.3s, border-radius 0.6s;
         }
 
-        #os-window.open {
+        #window-manager.active {
             transform: translateY(0) scale(1);
             opacity: 1;
             border-radius: 0px;
             pointer-events: auto;
         }
 
-        /* 6. Professional Gestures (Home Indicator) */
-        .gesture-bar-zone {
+        /* 7. إيماءة التنقل (Home Navigation) */
+        .gesture-handle {
             position: absolute;
-            bottom: 0; width: 100%; height: 50px;
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
+            bottom: 0; width: 100%; height: 45px;
+            z-index: 2100; /* أعلى من كل شيء لضمان الاستجابة */
+            display: flex; justify-content: center; align-items: flex-end;
             padding-bottom: 12px;
+            cursor: grab;
         }
 
-        .indicator {
+        .pill {
             width: 140px; height: 5px;
             background: rgba(255,255,255,0.4);
             border-radius: 10px;
-            transition: all 0.3s var(--hyper-bezier);
+            transition: background 0.3s, transform 0.3s;
         }
 
-        #os-window.open ~ .gesture-bar-zone .indicator {
-            background: rgba(0,0,0,0.15);
+        #window-manager.active ~ .gesture-handle .pill {
+            background: rgba(0,0,0,0.2);
             width: 120px;
         }
 
-        /* 7. The Dock (Glassmorphism) */
-        .system-dock {
-            position: absolute;
-            bottom: 25px; left: 18px; right: 18px;
-            height: 92px;
-            background: rgba(255, 255, 255, 0.22);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border-radius: 38px;
-            border: 1px solid rgba(255,255,255,0.15);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0 15px;
-            z-index: 100;
-            transition: transform 0.6s var(--hyper-bezier);
-        }
-
+        /* محتوى التطبيق */
+        .app-shell { flex: 1; background: #fff; padding-top: 60px; color: #000; overflow-y: auto; }
+        .card { background: #f9f9fb; border-radius: 28px; padding: 25px; margin: 15px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-<div class="device-chassis">
-    <div class="dynamic-notch"></div>
-    <div id="wallpaper-engine"></div>
+<div class="phone-body">
+    <div class="dynamic-island"></div>
+    <div id="wallpaper"></div>
     
-    <div class="absolute top-0 w-full h-12 flex justify-between items-center px-10 z-[500] font-bold text-[13px]">
-        <div id="clock-tick">12:00</div>
-        <div class="flex gap-2">📶 5G 🔋 88%</div>
+    <div class="absolute top-0 w-full h-12 flex justify-between items-center px-10 z-[500] font-bold text-[14px]">
+        <div id="time">00:00</div>
+        <div class="flex gap-2">📶 🔋</div>
     </div>
 
-    <div class="icon-grid" id="launcher"></div>
+    <div id="home-screen">
+        <div class="launcher-grid" id="grid"></div>
+        <div class="dock" id="dock-layer"></div>
+    </div>
 
-    <div class="system-dock" id="dock"></div>
-
-    <div id="os-window">
-        <div class="h-24 px-8 flex items-end pb-4 bg-white border-b border-gray-100">
-            <h1 id="app-title" class="text-3xl font-black text-black">App</h1>
-        </div>
-        <div class="flex-1 overflow-y-auto p-6 bg-[#f8f8fa]">
-            <div class="bg-white p-6 rounded-3xl shadow-sm mb-4">
-                <p class="text-black/60 text-sm leading-relaxed" id="app-info">
-                    محاكاة دقيقة لنظام HyperOS 2.0. تم اختبار سلاسة الرسوميات (Motion Test) لتعمل بمعدل 120 إطاراً.
-                </p>
+    <div id="window-manager">
+        <div class="app-shell">
+            <div class="px-8 pb-4">
+                <h1 id="app-name" class="text-4xl font-black text-black">System</h1>
+                <p class="text-gray-400 mt-2">HyperOS Intelligence</p>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="h-32 bg-white rounded-3xl border border-gray-100 animate-pulse"></div>
-                <div class="h-32 bg-white rounded-3xl border border-gray-100 animate-pulse"></div>
+            <div class="card shadow-sm">
+                <div class="h-2 w-20 bg-blue-500 rounded-full mb-4"></div>
+                <h3 class="font-bold text-xl mb-2">Kernel Performance</h3>
+                <p class="text-sm opacity-60">النظام يعمل الآن بمحرك الرسوميات v5.0 مع دعم الإيماءات الفيزيائية الكاملة.</p>
+            </div>
+            <div class="card bg-zinc-900 text-white border-0">
+                <p class="font-mono text-xs opacity-50">Log: Initializing motion.dll... OK<br>Log: TouchDriver.sys... Loaded</p>
             </div>
         </div>
     </div>
 
-    <div class="gesture-bar-zone" id="home-indicator">
-        <div class="indicator"></div>
+    <div class="gesture-handle" id="home-pill">
+        <div class="pill"></div>
     </div>
 </div>
 
 <script>
 /**
- * HYPER-OS ULTIMATE KERNEL ENGINE
- * تم بناء هذا النظام ليحاكي السلوك الفيزيائي المعقد للأيقونات والإيماءات.
+ * HyperOS Kernel Engine v5.0
+ * كود مكثف لإدارة النظام والرسوميات
  */
 
 const Kernel = {
-    state: { isAnimating: false, touchY: 0, deltaY: 0 },
+    state: { active: false, startY: 0, deltaY: 0 },
 
-    // تعريف الأيقونات كرسوم متجهة ( طبق الأصل من هايبر أو إس )
-    iconDB: {
-        settings: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#9CA3AF"/><path d="M42 32C42 37.5 37.5 42 32 42C26.5 42 22 37.5 22 32C22 26.5 26.5 22 32 22C37.5 22 42 26.5 42 32Z" stroke="white" stroke-width="3"/><path d="M32 18V22M32 42V46M46 32H42M22 32H18M41.9 22.1L39.1 24.9M24.9 39.1L22.1 41.9M41.9 41.9L39.1 39.1M24.9 24.9L22.1 22.1" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`,
-        camera: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#1F2937"/><circle cx="32" cy="35" r="10" stroke="white" stroke-width="4"/><path d="M22 22H42L45 27H19L22 22Z" fill="white"/></svg>`,
-        gallery: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="white"/><circle cx="25" cy="25" r="6" fill="#FFB800"/><path d="M12 48L25 32L35 42L45 25L55 48H12Z" fill="#3B82F6"/></svg>`,
-        phone: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#10B981"/><path d="M45 40C45 42 43 45 40 45C35 45 25 35 20 30C18 28 16 25 16 22C16 19 19 16 22 16H25L28 25L25 28C27 32 32 37 36 39L39 36L45 39V40Z" fill="white"/></svg>`,
-        browser: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#3B82F6"/><circle cx="32" cy="32" r="14" stroke="white" stroke-width="3"/><path d="M32 18V46M18 32H46" stroke="white" stroke-width="2"/></svg>`,
-        security: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#059669"/><path d="M32 15L18 22V35C18 45 32 50 32 50C32 50 46 45 46 35V22L32 15Z" fill="white"/></svg>`
+    // بنك أيقونات شاومي الرسمية (SVG)
+    icons: {
+        settings: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#94a3b8"/><circle cx="32" cy="32" r="8" stroke="white" stroke-width="3"/><path d="M32 16v4m0 24v4m12-16h4M16 32h4m19.8-11.2l-2.8 2.8M27 39l-2.8 2.8m15.6 0l-2.8-2.8m-11.2-14l-2.8-2.8" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`,
+        camera: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#18181b"/><circle cx="32" cy="36" r="10" stroke="white" stroke-width="4"/><path d="M20 24h24l3 6H17l3-6z" fill="white"/></svg>`,
+        gallery: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="white"/><path d="M15 45l10-15 8 10 10-18 10 23H15z" fill="#3b82f6"/><circle cx="24" cy="24" r="5" fill="#f59e0b"/></svg>`,
+        security: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#059669"/><path d="M32 18l-12 5v10c0 8 12 13 12 13s12-5 12-13V23l-12-5z" fill="white"/></svg>`,
+        phone: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#10b981"/><path d="M42 38c0 3-3 6-6 6-5 0-14-9-14-14 0-3 3-6 6-6h2l2 6-3 3 2 2 3 3 3-3 6 2v2z" fill="white"/></svg>`,
+        browser: `<svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="#3b82f6"/><circle cx="32" cy="32" r="12" stroke="white" stroke-width="3"/><path d="M20 32h24M32 20v24" stroke="white" stroke-width="2"/></svg>`
     },
 
     init() {
-        this.buildUI();
-        this.clockHandler();
-        this.gestureHandler();
-        console.log("Kernel: Operational.");
+        this.render();
+        this.clock();
+        this.bindGestures();
+        console.log("Kernel: Operational. Gestures Enabled.");
     },
 
-    buildUI() {
+    render() {
+        const grid = document.getElementById('grid');
         const apps = [
-            {id: 'settings', n: 'الإعدادات'}, {id: 'camera', n: 'الكاميرا'},
-            {id: 'gallery', n: 'الصور'}, {id: 'security', n: 'الأمان'},
-            {id: 'settings', n: 'الملفات'}, {id: 'gallery', n: 'المتجر'},
-            {id: 'camera', n: 'الموسيقى'}, {id: 'settings', n: 'الحاسبة'}
+            {n: 'الإعدادات', i: 'settings'}, {n: 'الكاميرا', i: 'camera'},
+            {n: 'المعرض', i: 'gallery'}, {n: 'الأمان', i: 'security'},
+            {n: 'الملفات', i: 'settings'}, {n: 'الموسيقى', i: 'gallery'},
+            {n: 'المتصفح', i: 'browser'}, {n: 'الحاسبة', i: 'settings'}
         ];
 
-        const launcher = document.getElementById('launcher');
         apps.forEach(app => {
             const div = document.createElement('div');
-            div.className = 'icon-unit';
-            div.onclick = () => this.openApp(app.n);
-            div.innerHTML = `<div class="icon-svg">${this.iconDB[app.id] || this.iconDB.settings}</div><span class="text-[11px] font-medium opacity-90">${app.n}</span>`;
-            launcher.appendChild(div);
+            div.className = 'icon-container';
+            div.onclick = () => this.open(app.n);
+            div.innerHTML = `<div class="app-icon">${this.icons[app.i]}</div><span class="label">${app.n}</span>`;
+            grid.appendChild(div);
         });
 
-        // Build Dock
-        const dock = document.getElementById('dock');
-        ['phone', 'browser', 'gallery', 'camera'].forEach(id => {
+        const dock = document.getElementById('dock-layer');
+        ['phone', 'browser', 'gallery', 'camera'].forEach(i => {
             const div = document.createElement('div');
-            div.className = 'icon-svg !w-14 !h-14';
-            div.onclick = () => this.openApp(id);
-            div.innerHTML = this.iconDB[id];
+            div.className = 'app-icon !w-16 !h-16';
+            div.onclick = () => this.open('تطبيق سريع');
+            div.innerHTML = this.icons[i];
             dock.appendChild(div);
         });
     },
 
-    openApp(name) {
-        if (this.state.isAnimating) return;
-        this.state.isAnimating = true;
+    open(name) {
+        if (this.state.active) return;
+        this.state.active = true;
 
-        const win = document.getElementById('os-window');
-        const wall = document.getElementById('wallpaper-engine');
-        const dock = document.getElementById('dock');
-        const launcher = document.getElementById('launcher');
+        const win = document.getElementById('window-manager');
+        const wall = document.getElementById('wallpaper');
+        const dock = document.getElementById('dock-layer');
+        const grid = document.getElementById('grid');
 
-        document.getElementById('app-title').innerText = name;
-        win.style.transition = 'all 0.65s var(--hyper-bezier)';
-        win.classList.add('open');
-
-        wall.style.transform = 'scale(1.15) translateZ(0)';
-        wall.style.filter = 'blur(30px) brightness(0.7)';
+        document.getElementById('app-name').innerText = name;
+        win.classList.add('active');
+        
+        wall.style.transform = 'scale(1.15)';
+        wall.style.filter = 'blur(40px) brightness(0.6)';
         dock.style.transform = 'translateY(150px)';
-        launcher.style.transform = 'scale(0.9) opacity(0)';
-
-        setTimeout(() => this.state.isAnimating = false, 700);
+        grid.style.transform = 'scale(0.9) opacity(0)';
     },
 
-    gestureHandler() {
-        const ind = document.getElementById('home-indicator');
-        const win = document.getElementById('os-window');
-        const wall = document.getElementById('wallpaper-engine');
-        const dock = document.getElementById('dock');
-        const launcher = document.getElementById('launcher');
+    bindGestures() {
+        const pill = document.getElementById('home-pill');
+        const win = document.getElementById('window-manager');
+        const wall = document.getElementById('wallpaper');
+        const dock = document.getElementById('dock-layer');
+        const grid = document.getElementById('grid');
 
-        ind.addEventListener('touchstart', (e) => {
-            this.state.touchY = e.touches[0].clientY;
+        // منع التفاعل الافتراضي تماماً
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+
+        pill.addEventListener('touchstart', (e) => {
+            if (!this.state.active) return;
+            this.state.startY = e.touches[0].clientY;
             win.style.transition = 'none';
-        });
+        }, {passive: false});
 
-        ind.addEventListener('touchmove', (e) => {
-            this.state.deltaY = e.touches[0].clientY - this.state.touchY;
+        pill.addEventListener('touchmove', (e) => {
+            if (!this.state.active) return;
+            this.state.deltaY = e.touches[0].clientY - this.state.startY;
+
             if (this.state.deltaY > 0) {
-                const progress = Math.min(this.state.deltaY / 750, 1);
-                const scale = 1 - (progress * 0.18);
-                const radius = progress * 60;
-                
-                win.style.transform = `translateY(${this.state.deltaY}px) scale(${scale})`;
-                win.style.borderRadius = `${radius}px`;
-                wall.style.filter = `blur(${30 * (1-progress)}px) brightness(${0.7 + (progress * 0.3)})`;
-            }
-        });
+                const prog = Math.min(this.state.deltaY / 800, 1);
+                const scale = 1 - (prog * 0.2);
+                const rad = prog * 65;
 
-        ind.addEventListener('touchend', () => {
-            win.style.transition = 'all 0.5s var(--hyper-bezier)';
-            if (this.state.deltaY > 160) {
-                this.closeApp(win, wall, dock, launcher);
+                win.style.transform = `translateY(${this.state.deltaY}px) scale(${scale})`;
+                win.style.borderRadius = `${rad}px`;
+                wall.style.filter = `blur(${40 * (1-prog)}px) brightness(${0.6 + prog * 0.4})`;
+            }
+        }, {passive: false});
+
+        pill.addEventListener('touchend', () => {
+            if (!this.state.active) return;
+            win.style.transition = 'all 0.5s var(--mi-curve)';
+            
+            if (this.state.deltaY > 180) {
+                this.close(win, wall, dock, grid);
             } else {
                 win.style.transform = 'translateY(0) scale(1)';
                 win.style.borderRadius = '0px';
@@ -308,22 +303,24 @@ const Kernel = {
         });
     },
 
-    closeApp(win, wall, dock, launcher) {
-        win.classList.remove('open');
-        win.style.transform = 'translateY(100%) scale(0.9)';
-        win.style.borderRadius = '50px';
+    close(win, wall, dock, grid) {
+        win.classList.remove('active');
+        win.style.transform = 'translateY(100%) scale(0.92)';
+        win.style.borderRadius = '55px';
         wall.style.transform = 'scale(1)';
         wall.style.filter = 'blur(0px) brightness(1)';
         dock.style.transform = 'translateY(0)';
-        launcher.style.transform = 'scale(1) opacity(1)';
+        grid.style.transform = 'scale(1)';
+        grid.style.opacity = '1';
+        this.state.active = false;
     },
 
-    clockHandler() {
-        const tick = () => {
+    clock() {
+        const up = () => {
             const d = new Date();
-            document.getElementById('clock-tick').innerText = d.getHours().toString().padStart(2, '0') + ":" + d.getMinutes().toString().padStart(2, '0');
+            document.getElementById('time').innerText = d.getHours().toString().padStart(2, '0') + ":" + d.getMinutes().toString().padStart(2, '0');
         };
-        tick(); setInterval(tick, 1000);
+        up(); setInterval(up, 1000);
     }
 };
 
